@@ -1,0 +1,88 @@
+.order-tracker {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  transition: all 0.3s;
+}
+
+.order-tracker:hover {
+  box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+}
+
+.tracker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.order-id h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.1em;
+}
+
+.order-id p {
+  margin: 5px 0 0 0;
+  color: #999;
+  font-size: 0.9em;
+}
+
+.status-badge {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.9em;
+  text-transform: uppercase;
+}
+
+.status-badge.completed {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-badge.in-progress {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.status-badge.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-badge.cancelled {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.tracker-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.order-total {
+  margin: 0;
+  color: #666;
+  font-size: 1em;
+}
+
+.btn-view-details {
+  padding: 8px 16px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-view-details:hover {
+  background: #764ba2;
+  transform: translateY(-2px);
+}

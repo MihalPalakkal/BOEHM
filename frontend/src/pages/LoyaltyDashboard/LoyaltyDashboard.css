@@ -1,0 +1,114 @@
+.loyalty-dashboard {
+  padding: 20px;
+  min-height: 100vh;
+  background: #f9f9f9;
+}
+
+.loyalty-dashboard h1 {
+  font-size: 2.5em;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.loyalty-header {
+  margin-bottom: 40px;
+}
+
+.loyalty-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.stat {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 30px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.stat h2 {
+  margin: 0;
+  font-size: 2.5em;
+}
+
+.stat p {
+  margin: 10px 0 0 0;
+  font-size: 1.1em;
+  opacity: 0.9;
+}
+
+.rewards-section {
+  margin-bottom: 40px;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.rewards-section h2 {
+  font-size: 2em;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.rewards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.tiers-section {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.tiers-section h2 {
+  font-size: 2em;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.tiers-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.tier {
+  padding: 25px;
+  border-radius: 10px;
+  text-align: center;
+  color: white;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.tier h3 {
+  margin-top: 0;
+  font-size: 1.5em;
+}
+
+.tier p {
+  margin: 0;
+}
+
+.tier.bronze {
+  background: linear-gradient(135deg, #CD7F32 0%, #B87333 100%);
+}
+
+.tier.silver {
+  background: linear-gradient(135deg, #C0C0C0 0%, #A8A9AD 100%);
+}
+
+.tier.gold {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  color: #333;
+}
+
+.tier.platinum {
+  background: linear-gradient(135deg, #E5E4E2 0%, #D7CCCCC 100%);
+  color: #333;
+}

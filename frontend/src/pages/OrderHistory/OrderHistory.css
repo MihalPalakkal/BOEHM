@@ -1,0 +1,23 @@
+.order-history-page {
+  padding: 20px;
+  min-height: 100vh;
+  background: #f9f9f9;
+}
+
+.order-history-page h1 {
+  font-size: 2.5em;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.orders-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.no-orders {
+  text-align: center;
+  color: #999;
+  padding: 40px;
+  font-size: 1.2em;
+}
