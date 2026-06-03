@@ -1,18 +1,20 @@
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../../components/ProductCard/ProductCard';
-import { menuCategories, menuItems } from '../../services/menuService';
+import { getAllMenuItems, getMenuCategories } from '../../services/menuService';
 import { formatCurrency } from '../../services/currencyService';
 import { useCart } from '../../context/CartContext';
 import './Menu.css';
 
 function Menu() {
+  const [products] = useState(() => getAllMenuItems());
   const [activeCategory, setActiveCategory] = useState('All');
   const [query, setQuery] = useState('');
   const [sortMode, setSortMode] = useState('recommended');
   const [lastAdded, setLastAdded] = useState('');
   const toastTimeoutRef = useRef(null);
   const { addItem, items, itemCount, subtotal, total } = useCart();
+  const categories = useMemo(() => getMenuCategories(products), [products]);
 
   const handleAddToCart = (product) => {
     addItem(product);
@@ -21,7 +23,7 @@ function Menu() {
     toastTimeoutRef.current = window.setTimeout(() => setLastAdded(''), 2200);
   };
 
-  const filteredItems = menuItems
+  const filteredItems = products
     .filter((item) => activeCategory === 'All' || item.category === activeCategory)
     .filter((item) => {
       const searchableText = `${item.name} ${item.description} ${item.category} ${item.tags.join(' ')}`;
@@ -42,6 +44,9 @@ function Menu() {
           <p className="eyebrow">Order direct</p>
           <h1>BOEHM menu</h1>
           <p>Filter the kitchen board, add dishes, and keep your cart in view.</p>
+          <Link to="/menu-manager" className="text-link menu-manager-link">
+            Manage menu
+          </Link>
         </div>
 
         <div className="menu-search">
@@ -61,7 +66,7 @@ function Menu() {
           <div className="filter-block">
             <h2>Categories</h2>
             <div className="category-list">
-              {menuCategories.map((category) => (
+              {categories.map((category) => (
                 <button
                   key={category}
                   type="button"

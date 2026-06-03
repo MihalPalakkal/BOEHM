@@ -1,4 +1,6 @@
-export const menuItems = [
+const CUSTOM_MENU_STORAGE_KEY = 'boehm-custom-menu-items';
+
+export const baseMenuItems = [
   {
     id: 1,
     name: 'Smash Burger Royale',
@@ -127,12 +129,55 @@ export const menuItems = [
   },
 ];
 
-export const menuCategories = ['All', ...new Set(menuItems.map((item) => item.category))];
+const canUseStorage = () => typeof window !== 'undefined' && window.localStorage;
 
-export const featuredItems = menuItems.filter((item) =>
+export const getStoredCustomMenuItems = () => {
+  if (!canUseStorage()) return [];
+
+  try {
+    return JSON.parse(window.localStorage.getItem(CUSTOM_MENU_STORAGE_KEY) || '[]');
+  } catch {
+    return [];
+  }
+};
+
+const saveCustomMenuItems = (items) => {
+  window.localStorage.setItem(CUSTOM_MENU_STORAGE_KEY, JSON.stringify(items));
+};
+
+export const getAllMenuItems = () => [...baseMenuItems, ...getStoredCustomMenuItems()];
+
+export const getMenuCategories = (items = getAllMenuItems()) => [
+  'All',
+  ...new Set(items.map((item) => item.category)),
+];
+
+export const saveCustomMenuItem = (item) => {
+  const customItem = {
+    ...item,
+    id: `custom-${Date.now()}`,
+    isCustom: true,
+  };
+  const nextItems = [customItem, ...getStoredCustomMenuItems()];
+  saveCustomMenuItems(nextItems);
+  return customItem;
+};
+
+export const removeCustomMenuItem = (itemId) => {
+  const nextItems = getStoredCustomMenuItems().filter((item) => item.id !== itemId);
+  saveCustomMenuItems(nextItems);
+  return nextItems;
+};
+
+export const menuItems = getAllMenuItems();
+
+export const menuCategories = getMenuCategories(menuItems);
+
+export const featuredItems = baseMenuItems.filter((item) =>
   ['Smash Burger Royale', 'Charred Chicken Bowl', 'Wood Fired Margherita'].includes(item.name),
 );
 
-export const findMenuItem = (itemId) => menuItems.find((item) => item.id === Number(itemId));
+export const findMenuItem = (itemId) =>
+  getAllMenuItems().find((item) => String(item.id) === String(itemId));
 
-export default menuItems;
+export default baseMenuItems;

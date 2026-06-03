@@ -14,6 +14,7 @@ import Register from './pages/Register/Register';
 import Profile from './pages/Profile/Profile';
 import OrderHistory from './pages/OrderHistory/OrderHistory';
 import LoyaltyDashboard from './pages/LoyaltyDashboard/LoyaltyDashboard';
+import MenuManager from './pages/MenuManager/MenuManager';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/orders" element={<OrderHistory />} />
               <Route path="/loyalty" element={<LoyaltyDashboard />} />
+              <Route path="/menu-manager" element={<MenuManager />} />
             </Routes>
           </main>
           <Footer />
