@@ -1,75 +1,86 @@
 .cart-item {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr) auto auto auto;
+  gap: 16px;
   align-items: center;
-  padding: 15px;
-  border-bottom: 1px solid #eee;
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
 }
 
-.cart-item:last-child {
-  border-bottom: none;
-}
-
-.item-details {
-  flex: 1;
+.cart-item-image {
+  width: 92px;
+  height: 76px;
+  object-fit: cover;
+  border-radius: var(--radius);
 }
 
 .item-details h3 {
-  margin: 0;
-  font-size: 1.1em;
-  color: #333;
+  font-size: 1rem;
 }
 
-.item-price {
-  margin: 5px 0 0 0;
-  color: #667eea;
-  font-weight: bold;
+.item-details p {
+  font-size: 0.88rem;
+}
+
+.item-price,
+.item-total p {
+  color: var(--ink);
+  font-weight: 900;
 }
 
 .item-quantity {
-  display: flex;
+  display: inline-grid;
+  grid-template-columns: 36px 36px 36px;
   align-items: center;
-  gap: 10px;
-  margin: 0 20px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
 }
 
-.item-quantity button {
-  width: 30px;
-  height: 30px;
-  border: 1px solid #ddd;
-  background: white;
-  border-radius: 3px;
-  cursor: pointer;
-  transition: all 0.3s;
+.item-quantity button,
+.item-quantity span {
+  min-height: 36px;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  border: 0;
+  font-weight: 900;
 }
 
 .item-quantity button:hover {
-  background: #667eea;
-  color: white;
-  border-color: #667eea;
-}
-
-.item-total {
-  min-width: 80px;
-  text-align: right;
-}
-
-.item-total p {
-  margin: 0;
-  font-weight: bold;
-  font-size: 1.1em;
+  background: var(--surface-soft);
 }
 
 .btn-remove {
-  padding: 8px 15px;
-  background: #ff6b6b;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: all 0.3s;
+  min-height: 36px;
+  padding: 0 12px;
+  color: var(--tomato);
+  background: rgba(180, 35, 24, 0.08);
+  border: 1px solid rgba(180, 35, 24, 0.18);
+  border-radius: var(--radius);
+  font-weight: 900;
 }
 
-.btn-remove:hover {
-  background: #ee5a52;
+@media (max-width: 760px) {
+  .cart-item {
+    grid-template-columns: 76px minmax(0, 1fr) auto;
+  }
+
+  .cart-item-image {
+    width: 76px;
+    height: 72px;
+  }
+
+  .item-quantity,
+  .btn-remove {
+    grid-column: 2 / -1;
+    justify-self: start;
+  }
+
+  .item-total {
+    justify-self: end;
+  }
 }

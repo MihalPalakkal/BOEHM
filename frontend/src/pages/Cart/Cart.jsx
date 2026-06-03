@@ -1,61 +1,112 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import CartItem from '../../components/CartItem/CartItem';
+import ProductCard from '../../components/ProductCard/ProductCard';
+import { menuItems } from '../../services/menuService';
+import { formatCurrency } from '../../services/currencyService';
+import { useCart } from '../../context/CartContext';
 import './Cart.css';
 
 function Cart() {
-  const [items, setItems] = useState([
-    { id: 1, name: 'Burger Deluxe', price: 12.99, quantity: 1 },
-    { id: 2, name: 'Caesar Salad', price: 8.99, quantity: 2 },
-  ]);
+  const {
+    items,
+    addItem,
+    removeItem,
+    updateQuantity,
+    subtotal,
+    tax,
+    serviceFee,
+    deliveryFee,
+    total,
+    freeDeliveryRemaining,
+    rewardPoints,
+  } = useCart();
 
-  const handleRemove = (id) => {
-    setItems(items.filter(item => item.id !== id));
-  };
-
-  const handleUpdateQuantity = (id, quantity) => {
-    setItems(items.map(item =>
-      item.id === id ? { ...item, quantity } : item
-    ));
-  };
-
-  const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const suggestedItems = menuItems
+    .filter((menuItem) => !items.some((cartItem) => cartItem.id === menuItem.id))
+    .slice(0, 3);
 
   return (
     <div className="cart-page">
-      <h1>Shopping Cart</h1>
+      <section className="section-shell page-heading">
+        <p className="eyebrow">Your order</p>
+        <h1>Cart</h1>
+      </section>
       
-      {items.length === 0 ? (
-        <p className="empty-cart">Your cart is empty</p>
-      ) : (
-        <>
+      <section className="section-shell cart-layout">
+        {items.length === 0 ? (
+          <div className="empty-cart">
+            <h2>Your cart is ready when you are.</h2>
+            <p>Start with a signature dish, then checkout for pickup or delivery.</p>
+            <Link to="/menu" className="btn primary">Browse menu</Link>
+          </div>
+        ) : (
           <div className="cart-items">
-            {items.map(item => (
+            {items.map((item) => (
               <CartItem
                 key={item.id}
                 item={item}
-                onRemove={handleRemove}
-                onUpdateQuantity={handleUpdateQuantity}
+                onRemove={removeItem}
+                onUpdateQuantity={updateQuantity}
               />
             ))}
           </div>
-          
-          <div className="cart-summary">
-            <h2>Order Summary</h2>
-            <div className="summary-row">
-              <span>Subtotal:</span>
-              <span>${total.toFixed(2)}</span>
-            </div>
-            <div className="summary-row">
-              <span>Tax:</span>
-              <span>${(total * 0.1).toFixed(2)}</span>
-            </div>
-            <div className="summary-row total">
-              <span>Total:</span>
-              <span>${(total * 1.1).toFixed(2)}</span>
-            </div>
-            <a href="/checkout" className="btn btn-checkout">Proceed to Checkout</a>
+        )}
+
+        <aside className="cart-summary">
+          <h2>Order summary</h2>
+          <div className="summary-row">
+            <span>Subtotal</span>
+            <span>{formatCurrency(subtotal)}</span>
           </div>
-        </>
+          <div className="summary-row">
+            <span>Service fee</span>
+            <span>{formatCurrency(serviceFee)}</span>
+          </div>
+          <div className="summary-row">
+            <span>Delivery</span>
+            <span>{deliveryFee === 0 ? 'Free' : formatCurrency(deliveryFee)}</span>
+          </div>
+          <div className="summary-row">
+            <span>Tax</span>
+            <span>{formatCurrency(tax)}</span>
+          </div>
+          <div className="summary-row total">
+            <span>Total</span>
+            <span>{formatCurrency(total)}</span>
+          </div>
+
+          {freeDeliveryRemaining > 0 && (
+            <p className="cart-note">
+              Add {formatCurrency(freeDeliveryRemaining)} more for free delivery.
+            </p>
+          )}
+
+          <p className="cart-note">Earn {rewardPoints} reward points with this order.</p>
+          <Link
+            to={items.length > 0 ? '/checkout' : '/menu'}
+            className={`btn ${items.length > 0 ? 'primary' : 'secondary'}`}
+          >
+            {items.length > 0 ? 'Proceed to checkout' : 'Add dishes'}
+          </Link>
+        </aside>
+      </section>
+
+      {suggestedItems.length > 0 && (
+        <section className="section-shell cart-suggestions">
+          <div className="section-heading split">
+            <div>
+              <p className="eyebrow">Pairs well</p>
+              <h2>Round out the order</h2>
+            </div>
+          </div>
+
+          <div className="featured-grid">
+            {suggestedItems.map((item) => (
+              <ProductCard key={item.id} product={item} onAddToCart={addItem} compact />
+            ))}
+          </div>
+        </section>
       )}
     </div>
   );

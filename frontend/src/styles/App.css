@@ -2,9 +2,11 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background:
+    linear-gradient(180deg, rgba(255, 253, 250, 0.7), rgba(245, 247, 242, 0.95) 18%),
+    var(--canvas);
 }
 
 .main-content {
   flex: 1;
-  padding-top: 0;
 }

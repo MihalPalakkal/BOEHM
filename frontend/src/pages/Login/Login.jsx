@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import authService from '../../services/authService';
 import './Login.css';
 
 function Login() {
@@ -6,6 +8,7 @@ function Login() {
     email: '',
     password: ''
   });
+  const [status, setStatus] = useState(null);
 
   const handleChange = (e) => {
     setFormData({
@@ -14,23 +17,53 @@ function Login() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert('Login successful!');
-    // API call would go here
+    setStatus({ type: 'loading', message: 'Signing in...' });
+
+    try {
+      const response = await authService.login(formData.email, formData.password);
+      const user = response.data?.user || { email: formData.email, name: 'BOEHM Guest' };
+      const token = response.data?.token;
+
+      if (token) authService.setToken(token);
+      authService.setCurrentUser(user);
+      setStatus({ type: 'success', message: 'Signed in. Your order profile is ready.' });
+    } catch {
+      const localUser = {
+        email: formData.email,
+        name: formData.email.split('@')[0] || 'BOEHM Guest',
+        tier: 'Gold',
+      };
+      authService.setCurrentUser(localUser);
+      setStatus({
+        type: 'warning',
+        message: 'API is not reachable, so a local preview session was created.',
+      });
+    }
   };
 
   return (
     <div className="login-page">
-      <div className="login-container">
+      <div className="auth-layout section-shell">
+        <section className="auth-copy">
+          <p className="eyebrow">Welcome back</p>
+          <h1>Sign in before checkout or keep browsing the menu.</h1>
+          <p>
+            Save addresses, earn rewards, and reorder favorites from one direct BOEHM
+            account.
+          </p>
+        </section>
+
         <div className="login-box">
-          <h1>Login</h1>
-          <p className="subtitle">Welcome back to BOEHM</p>
+          <h2>Login</h2>
+          <p className="subtitle">Use your BOEHM account details.</p>
           
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label>Email Address</label>
+              <label htmlFor="login-email">Email address</label>
               <input
+                id="login-email"
                 type="email"
                 name="email"
                 placeholder="Enter your email"
@@ -41,8 +74,9 @@ function Login() {
             </div>
 
             <div className="form-group">
-              <label>Password</label>
+              <label htmlFor="login-password">Password</label>
               <input
+                id="login-password"
                 type="password"
                 name="password"
                 placeholder="Enter your password"
@@ -52,12 +86,14 @@ function Login() {
               />
             </div>
 
-            <button type="submit" className="btn-login">Sign In</button>
+            {status && <p className={`form-status ${status.type}`}>{status.message}</p>}
+
+            <button type="submit" className="btn-login">Sign in</button>
           </form>
 
           <div className="login-footer">
-            <p>Don't have an account? <a href="/register">Register here</a></p>
-            <p><a href="#forgot">Forgot password?</a></p>
+            <p>New to BOEHM? <Link to="/register">Create an account</Link></p>
+            <p><Link to="/menu">Continue as guest</Link></p>
           </div>
         </div>
       </div>

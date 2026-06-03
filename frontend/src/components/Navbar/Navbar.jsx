@@ -1,32 +1,69 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
+import { useCart } from '../../context/CartContext';
 import './Navbar.css';
+
+const navItems = [
+  { to: '/', label: 'Home' },
+  { to: '/menu', label: 'Menu' },
+  { to: '/orders', label: 'Orders' },
+  { to: '/loyalty', label: 'Rewards' },
+  { to: '/profile', label: 'Profile' },
+];
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { itemCount } = useCart();
+
+  const closeMenu = () => setIsMenuOpen(false);
 
   return (
-    <nav className="navbar">
-      <div className="navbar-container">
-        <Link to="/" className="navbar-logo">
-          BOEHM
+    <header className="site-header">
+      <nav className="navbar" aria-label="Primary navigation">
+        <Link to="/" className="navbar-logo" onClick={closeMenu}>
+          <span className="logo-mark">B</span>
+          <span>
+            BOEHM
+            <small>direct kitchen</small>
+          </span>
         </Link>
+
         <div className={`nav-menu ${isMenuOpen ? 'active' : ''}`}>
-          <Link to="/" className="nav-link">Home</Link>
-          <Link to="/menu" className="nav-link">Menu</Link>
-          <Link to="/cart" className="nav-link">Cart</Link>
-          <Link to="/orders" className="nav-link">Orders</Link>
-          <Link to="/loyalty" className="nav-link">Loyalty</Link>
-          <Link to="/profile" className="nav-link">Profile</Link>
-          <Link to="/login" className="nav-link btn-login">Login</Link>
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.to === '/'}
+              className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+              onClick={closeMenu}
+            >
+              {item.label}
+            </NavLink>
+          ))}
         </div>
-        <div className="hamburger" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-          <span></span>
-          <span></span>
-          <span></span>
+
+        <div className="nav-actions">
+          <NavLink to="/cart" className="cart-link" onClick={closeMenu}>
+            <span>Cart</span>
+            <strong>{itemCount}</strong>
+          </NavLink>
+          <NavLink to="/login" className="account-link" onClick={closeMenu}>
+            Sign in
+          </NavLink>
+          <button
+            className={`menu-toggle ${isMenuOpen ? 'active' : ''}`}
+            type="button"
+            aria-label="Toggle navigation"
+            aria-expanded={isMenuOpen}
+            onClick={() => setIsMenuOpen((currentValue) => !currentValue)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </header>
   );
 }
 
