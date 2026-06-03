@@ -116,7 +116,7 @@ This project is licensed under the MIT License - see LICENSE file for details.
 
 **Author:** Mihal Palakkal
 
-For support, email: mihal@boehm.com or open an issue on GitHub.
+For support, open an issue on GitHub.
 
 ---
 
