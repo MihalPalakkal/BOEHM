@@ -9,7 +9,6 @@ const navItems = [
   { to: '/orders', label: 'Orders' },
   { to: '/loyalty', label: 'Rewards' },
   { to: '/profile', label: 'Profile' },
-  { to: '/menu-manager', label: 'Manage' },
 ];
 
 function Navbar() {

@@ -1,5 +1,3 @@
-const CUSTOM_MENU_STORAGE_KEY = 'boehm-custom-menu-items';
-
 export const baseMenuItems = [
   {
     id: 1,
@@ -129,47 +127,14 @@ export const baseMenuItems = [
   },
 ];
 
-const canUseStorage = () => typeof window !== 'undefined' && window.localStorage;
-
-export const getStoredCustomMenuItems = () => {
-  if (!canUseStorage()) return [];
-
-  try {
-    return JSON.parse(window.localStorage.getItem(CUSTOM_MENU_STORAGE_KEY) || '[]');
-  } catch {
-    return [];
-  }
-};
-
-const saveCustomMenuItems = (items) => {
-  window.localStorage.setItem(CUSTOM_MENU_STORAGE_KEY, JSON.stringify(items));
-};
-
-export const getAllMenuItems = () => [...baseMenuItems, ...getStoredCustomMenuItems()];
+export const getAllMenuItems = () => baseMenuItems;
 
 export const getMenuCategories = (items = getAllMenuItems()) => [
   'All',
   ...new Set(items.map((item) => item.category)),
 ];
 
-export const saveCustomMenuItem = (item) => {
-  const customItem = {
-    ...item,
-    id: `custom-${Date.now()}`,
-    isCustom: true,
-  };
-  const nextItems = [customItem, ...getStoredCustomMenuItems()];
-  saveCustomMenuItems(nextItems);
-  return customItem;
-};
-
-export const removeCustomMenuItem = (itemId) => {
-  const nextItems = getStoredCustomMenuItems().filter((item) => item.id !== itemId);
-  saveCustomMenuItems(nextItems);
-  return nextItems;
-};
-
-export const menuItems = getAllMenuItems();
+export const menuItems = baseMenuItems;
 
 export const menuCategories = getMenuCategories(menuItems);
 
@@ -178,6 +143,6 @@ export const featuredItems = baseMenuItems.filter((item) =>
 );
 
 export const findMenuItem = (itemId) =>
-  getAllMenuItems().find((item) => String(item.id) === String(itemId));
+  baseMenuItems.find((item) => String(item.id) === String(itemId));
 
 export default baseMenuItems;
