@@ -44,9 +44,6 @@ function Menu() {
           <p className="eyebrow">Order direct</p>
           <h1>BOEHM menu</h1>
           <p>Filter the kitchen board, add dishes, and keep your cart in view.</p>
-          <Link to="/menu-manager" className="text-link menu-manager-link">
-            Manage menu
-          </Link>
         </div>
 
         <div className="menu-search">

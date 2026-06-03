@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar/Navbar';
 import Footer from './components/Footer/Footer';
 import { CartProvider } from './context/CartContext';
@@ -14,7 +14,6 @@ import Register from './pages/Register/Register';
 import Profile from './pages/Profile/Profile';
 import OrderHistory from './pages/OrderHistory/OrderHistory';
 import LoyaltyDashboard from './pages/LoyaltyDashboard/LoyaltyDashboard';
-import MenuManager from './pages/MenuManager/MenuManager';
 
 function App() {
   return (
@@ -33,7 +32,7 @@ function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/orders" element={<OrderHistory />} />
               <Route path="/loyalty" element={<LoyaltyDashboard />} />
-              <Route path="/menu-manager" element={<MenuManager />} />
+              <Route path="*" element={<Navigate to="/menu" replace />} />
             </Routes>
           </main>
           <Footer />
