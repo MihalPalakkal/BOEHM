@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import CartItem from '../../components/CartItem/CartItem';
 import ProductCard from '../../components/ProductCard/ProductCard';
-import { menuItems } from '../../services/menuService';
+import { getAllMenuItems } from '../../services/menuService';
 import { formatCurrency } from '../../services/currencyService';
 import { useCart } from '../../context/CartContext';
 import './Cart.css';
@@ -22,7 +22,7 @@ function Cart() {
     rewardPoints,
   } = useCart();
 
-  const suggestedItems = menuItems
+  const suggestedItems = getAllMenuItems()
     .filter((menuItem) => !items.some((cartItem) => cartItem.id === menuItem.id))
     .slice(0, 3);
 
