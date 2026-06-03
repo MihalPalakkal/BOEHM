@@ -1,17 +1,146 @@
 .menu-page {
-  padding: 20px;
-  min-height: 100vh;
+  padding-bottom: 36px;
 }
 
-.menu-page h1 {
-  text-align: center;
-  font-size: 2.5em;
-  margin-bottom: 40px;
-  color: #333;
+.menu-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 390px);
+  gap: 24px;
+  align-items: end;
+  padding: 48px 0 22px;
+}
+
+.menu-hero h1 {
+  margin: 6px 0 8px;
+}
+
+.menu-search {
+  display: grid;
+  gap: 8px;
+}
+
+.menu-search label {
+  font-weight: 900;
+}
+
+.menu-layout {
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.menu-sidebar {
+  position: sticky;
+  top: 94px;
+  display: grid;
+  gap: 16px;
+}
+
+.filter-block,
+.mini-cart {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.filter-block h2 {
+  font-size: 1.1rem;
+}
+
+.category-list {
+  display: grid;
+  gap: 8px;
+}
+
+.category-list button {
+  min-height: 40px;
+  color: var(--muted);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-weight: 850;
+}
+
+.category-list button.active,
+.category-list button:hover {
+  color: #fff;
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.filter-block select {
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0 10px;
+}
+
+.mini-cart span {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.mini-cart strong {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.menu-content {
+  min-width: 0;
+}
+
+.menu-toolbar {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.menu-toolbar span {
+  color: var(--basil);
+  background: rgba(35, 122, 87, 0.1);
+  border-radius: 7px;
+  padding: 7px 10px;
+  font-weight: 900;
 }
 
 .menu-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 25px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+@media (max-width: 1020px) {
+  .menu-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .menu-sidebar {
+    position: static;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .mini-cart {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 740px) {
+  .menu-hero,
+  .menu-sidebar,
+  .menu-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .menu-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }

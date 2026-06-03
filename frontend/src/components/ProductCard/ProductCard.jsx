@@ -1,21 +1,42 @@
 import React from 'react';
+import { formatCurrency } from '../../services/currencyService';
 import './ProductCard.css';
 
-function ProductCard({ product, onAddToCart }) {
+function ProductCard({ product, onAddToCart, quantity = 0, compact = false }) {
   return (
-    <div className="product-card">
+    <article className={`product-card ${compact ? 'compact' : ''}`}>
       <div className="product-image">
         <img src={product.image} alt={product.name} />
+        <span style={{ '--accent': product.accent }} className="product-category">
+          {product.category}
+        </span>
       </div>
+
       <div className="product-details">
-        <h3>{product.name}</h3>
-        <p className="description">{product.description}</p>
-        <p className="price">${product.price}</p>
-        <button className="btn-add" onClick={() => onAddToCart(product)}>
-          Add to Cart
-        </button>
+        <div>
+          <h3>{product.name}</h3>
+          <p className="description">{product.description}</p>
+        </div>
+
+        <div className="product-meta" aria-label={`${product.prepTime} preparation time`}>
+          <span>{product.prepTime}</span>
+          <span>{product.calories} cal</span>
+        </div>
+
+        <div className="product-tags">
+          {product.tags.map((tag) => (
+            <span key={tag}>{tag}</span>
+          ))}
+        </div>
+
+        <div className="product-footer">
+          <p className="price">{formatCurrency(product.price)}</p>
+          <button className="btn-add" type="button" onClick={() => onAddToCart(product)}>
+            {quantity > 0 ? `Add again (${quantity})` : 'Add'}
+          </button>
+        </div>
       </div>
-    </div>
+    </article>
   );
 }
 

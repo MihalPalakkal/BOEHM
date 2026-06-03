@@ -1,56 +1,43 @@
 .loyalty-card {
-  background: white;
-  border-radius: 10px;
+  display: grid;
+  gap: 16px;
   padding: 20px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  transition: transform 0.3s;
-}
-
-.loyalty-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
 }
 
 .card-header {
   display: flex;
+  align-items: flex-start;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-}
-
-.card-header h3 {
-  margin: 0;
-  color: #333;
+  gap: 14px;
 }
 
 .points-badge {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-size: 0.9em;
-  font-weight: bold;
+  white-space: nowrap;
+  color: var(--tomato);
+  background: rgba(180, 35, 24, 0.08);
+  border-radius: 7px;
+  padding: 6px 8px;
+  font-size: 0.78rem;
+  font-weight: 950;
 }
 
 .card-description {
-  margin: 0 0 15px 0;
-  color: #666;
-  font-size: 0.95em;
-  line-height: 1.5;
+  min-height: 48px;
 }
 
 .btn-redeem {
-  width: 100%;
-  padding: 10px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  border-radius: 5px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: transform 0.3s;
+  min-height: 42px;
+  color: #fff;
+  background: var(--ink);
+  border: 0;
+  border-radius: var(--radius);
+  font-weight: 900;
 }
 
-.btn-redeem:hover {
-  transform: translateY(-2px);
+.btn-redeem:not(:disabled):hover {
+  background: var(--tomato);
 }

@@ -1,23 +1,40 @@
-.order-history-page {
-  padding: 20px;
-  min-height: 100vh;
-  background: #f9f9f9;
-}
-
-.order-history-page h1 {
-  font-size: 2.5em;
-  margin-bottom: 30px;
-  text-align: center;
-}
-
 .orders-container {
-  max-width: 800px;
-  margin: 0 auto;
+  display: grid;
+  gap: 14px;
+}
+
+.order-history-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.btn-reorder {
+  width: 128px;
+  color: #fff;
+  background: var(--tomato);
+  border: 0;
+  border-radius: var(--radius);
+  font-weight: 950;
 }
 
 .no-orders {
-  text-align: center;
-  color: #999;
-  padding: 40px;
-  font-size: 1.2em;
+  display: grid;
+  gap: 14px;
+  padding: 34px;
+  background: var(--surface);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+}
+
+@media (max-width: 720px) {
+  .order-history-card {
+    grid-template-columns: 1fr;
+  }
+
+  .btn-reorder {
+    width: 100%;
+    min-height: 44px;
+  }
 }
