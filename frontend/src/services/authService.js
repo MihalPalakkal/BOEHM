@@ -1,14 +1,12 @@
-import axios from 'axios';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import api from './api';
 
 export const authService = {
   login: (email, password) => {
-    return axios.post(`${API_BASE_URL}/auth/login`, { email, password });
+    return api.post('/auth/login', { email, password });
   },
 
   register: (userData) => {
-    return axios.post(`${API_BASE_URL}/auth/register`, userData);
+    return api.post('/auth/register', userData);
   },
 
   logout: () => {
@@ -17,7 +15,11 @@ export const authService = {
   },
 
   getCurrentUser: () => {
-    return JSON.parse(localStorage.getItem('user'));
+    try {
+      return JSON.parse(localStorage.getItem('user'));
+    } catch {
+      return null;
+    }
   },
 
   getToken: () => {
@@ -30,7 +32,14 @@ export const authService = {
 
   setCurrentUser: (user) => {
     localStorage.setItem('user', JSON.stringify(user));
-  }
+  },
 };
+
+export const formatCurrency = (amount) =>
+  new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0,
+  }).format(amount);
 
 export default authService;

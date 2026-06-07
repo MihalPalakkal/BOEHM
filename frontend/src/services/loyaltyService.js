@@ -1,27 +1,25 @@
-import axios from 'axios';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import api from './api';
 
 export const loyaltyService = {
   getUserLoyalty: (userId) => {
-    return axios.get(`${API_BASE_URL}/loyalty/user/${userId}`);
+    return api.get(`/loyalty/user/${userId}`);
   },
 
   getRewards: (userId) => {
-    return axios.get(`${API_BASE_URL}/loyalty/rewards/${userId}`);
+    return api.get(`/loyalty/rewards/${userId}`);
   },
 
   redeemReward: (userId, rewardId) => {
-    return axios.post(`${API_BASE_URL}/loyalty/redeem`, { userId, rewardId });
+    return api.post('/loyalty/redeem', { userId, rewardId });
   },
 
   getLoyaltyTiers: () => {
-    return axios.get(`${API_BASE_URL}/loyalty/tiers`);
+    return api.get('/loyalty/tiers');
   },
 
   getUserPoints: (userId) => {
-    return axios.get(`${API_BASE_URL}/loyalty/points/${userId}`);
-  }
+    return api.get(`/loyalty/points/${userId}`);
+  },
 };
 
 export default loyaltyService;

@@ -1,27 +1,25 @@
-import axios from 'axios';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import api from './api';
 
 export const orderService = {
   getOrders: (userId) => {
-    return axios.get(`${API_BASE_URL}/orders/${userId}`);
+    return api.get(`/orders/${userId}`);
   },
 
   getOrderById: (orderId) => {
-    return axios.get(`${API_BASE_URL}/orders/detail/${orderId}`);
+    return api.get(`/orders/detail/${orderId}`);
   },
 
   createOrder: (orderData) => {
-    return axios.post(`${API_BASE_URL}/orders`, orderData);
+    return api.post('/orders', orderData);
   },
 
   updateOrder: (orderId, orderData) => {
-    return axios.put(`${API_BASE_URL}/orders/${orderId}`, orderData);
+    return api.put(`/orders/${orderId}`, orderData);
   },
 
   cancelOrder: (orderId) => {
-    return axios.put(`${API_BASE_URL}/orders/${orderId}/cancel`);
-  }
+    return api.put(`/orders/${orderId}/cancel`);
+  },
 };
 
 export default orderService;

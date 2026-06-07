@@ -1,27 +1,25 @@
-import axios from 'axios';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import api from './api';
 
 export const userService = {
   getUserProfile: (userId) => {
-    return axios.get(`${API_BASE_URL}/users/${userId}`);
+    return api.get(`/users/${userId}`);
   },
 
   updateUserProfile: (userId, userData) => {
-    return axios.put(`${API_BASE_URL}/users/${userId}`, userData);
+    return api.put(`/users/${userId}`, userData);
   },
 
   getUserPreferences: (userId) => {
-    return axios.get(`${API_BASE_URL}/users/${userId}/preferences`);
+    return api.get(`/users/${userId}/preferences`);
   },
 
   updateUserPreferences: (userId, preferences) => {
-    return axios.put(`${API_BASE_URL}/users/${userId}/preferences`, preferences);
+    return api.put(`/users/${userId}/preferences`, preferences);
   },
 
   deleteUser: (userId) => {
-    return axios.delete(`${API_BASE_URL}/users/${userId}`);
-  }
+    return api.delete(`/users/${userId}`);
+  },
 };
 
 export default userService;
