@@ -1,47 +1,39 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import OrderTracker from '../../components/OrderTracker/OrderTracker';
 import { findMenuItem } from '../../services/menuService';
 import { useCart } from '../../context/CartContext';
+import orderService from '../../services/orderService';
+import authService from '../../services/authService';
 import './OrderHistory.css';
 
 function OrderHistory() {
   const { addItem } = useCart();
-  const [orders] = React.useState([
-    {
-      id: 'BOE-492118',
-      date: 'Today, 7:14 PM',
-      total: '₹587',
-      status: 'Preparing',
-      fulfillment: 'Delivery',
-      items: ['Smash Burger Royale', 'Truffle Parm Fries'],
-      menuItemIds: [1, 7],
-    },
-    {
-      id: 'BOE-488903',
-      date: 'May 31, 2026',
-      total: '₹1,124',
-      status: 'Completed',
-      fulfillment: 'Pickup',
-      items: ['Wood Fired Margherita', 'Roasted Beet Salad', 'Blood Orange Spritz'],
-      menuItemIds: [3, 6, 9],
-    },
-    {
-      id: 'BOE-473611',
-      date: 'May 24, 2026',
-      total: '₹704',
-      status: 'Completed',
-      fulfillment: 'Delivery',
-      items: ['Charred Chicken Bowl', 'Chocolate Olive Oil Cake'],
-      menuItemIds: [2, 8],
-    },
-  ]);
+  const [orders, setOrders] = useState([]);
+  const [status, setStatus] = useState(null);
+
+  useEffect(() => {
+    const loadOrders = async () => {
+      const user = authService.getCurrentUser();
+      if (!user?.id) {
+        setOrders([]);
+        return;
+      }
+
+      try {
+        const response = await orderService.getOrders(user.id);
+        setOrders(response.data || []);
+      } catch {
+        setStatus({ type: 'error', message: 'Could not load order history.' });
+      }
+    };
+
+    loadOrders();
+  }, []);
 
   const reorder = (order) => {
-    order.menuItemIds
-      .map(findMenuItem)
-      .filter(Boolean)
-      .forEach(addItem);
+    const ids = order.items?.map((item) => item.menuItemId ?? item.id) || order.menuItemIds || [];
+    ids.map(findMenuItem).filter(Boolean).forEach(addItem);
   };
 
   return (
@@ -51,15 +43,21 @@ function OrderHistory() {
           <p className="eyebrow">Orders</p>
           <h1>Order history</h1>
         </div>
-        <Link className="btn secondary" to="/menu">New order</Link>
+        <Link className="btn secondary" to="/menu">
+          New order
+        </Link>
       </section>
-      
+
       <div className="orders-container section-shell">
+        {status && <p className={`form-status ${status.type}`}>{status.message}</p>}
+
         {orders.length === 0 ? (
           <div className="no-orders">
             <h2>No orders yet</h2>
             <p>Your BOEHM orders will appear here after checkout.</p>
-            <Link className="btn primary" to="/menu">Browse menu</Link>
+            <Link className="btn primary" to="/menu">
+              Browse menu
+            </Link>
           </div>
         ) : (
           orders.map((order) => (

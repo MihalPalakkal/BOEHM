@@ -1,26 +1,28 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import authService from '../../services/authService';
 import './Register.css';
 
 function Register() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
   });
   const [status, setStatus] = useState(null);
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (formData.password !== formData.confirmPassword) {
       setStatus({ type: 'warning', message: 'Passwords do not match.' });
       return;
@@ -34,21 +36,19 @@ function Register() {
         email: formData.email,
         password: formData.password,
       });
-      authService.setCurrentUser(response.data?.user || {
-        name: formData.name,
-        email: formData.email,
-        tier: 'Bronze',
-      });
-      setStatus({ type: 'success', message: 'Account created. You can start ordering.' });
-    } catch {
-      authService.setCurrentUser({
-        name: formData.name,
-        email: formData.email,
-        tier: 'Bronze',
-      });
+
+      const user = response.data?.user;
+      const token = response.data?.token;
+
+      if (token) authService.setToken(token);
+      if (user) authService.setCurrentUser(user);
+
+      setStatus({ type: 'success', message: 'Account created. Redirecting...' });
+      navigate('/');
+    } catch (error) {
       setStatus({
-        type: 'warning',
-        message: 'API is not reachable, so a local preview account was created.',
+        type: 'error',
+        message: error?.response?.data?.error || 'Registration failed.',
       });
     }
   };
@@ -60,15 +60,14 @@ function Register() {
           <p className="eyebrow">Join BOEHM</p>
           <h1>Rewards start with your first direct order.</h1>
           <p>
-            Create an account for saved handoff details, loyalty points, and faster
-            repeat orders.
+            Create an account for saved handoff details, loyalty points, and faster repeat orders.
           </p>
         </section>
 
         <div className="register-box">
           <h2>Create account</h2>
           <p className="subtitle">Set up your direct ordering profile.</p>
-          
+
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label htmlFor="register-name">Full name</label>
@@ -124,11 +123,15 @@ function Register() {
 
             {status && <p className={`form-status ${status.type}`}>{status.message}</p>}
 
-            <button type="submit" className="btn-register">Create account</button>
+            <button type="submit" className="btn-register" disabled={status?.type === 'loading'}>
+              Create account
+            </button>
           </form>
 
           <div className="register-footer">
-            <p>Already have an account? <Link to="/login">Sign in</Link></p>
+            <p>
+              Already have an account? <Link to="/login">Sign in</Link>
+            </p>
           </div>
         </div>
       </div>

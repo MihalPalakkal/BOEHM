@@ -1,27 +1,56 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import LoyaltyCard from '../../components/LoyaltyCard/LoyaltyCard';
+import loyaltyService from '../../services/loyaltyService';
+import authService from '../../services/authService';
 import './LoyaltyDashboard.css';
 
 function LoyaltyDashboard() {
   const [message, setMessage] = useState('');
-  const [loyalty] = React.useState({
-    points: 2450,
-    tier: 'Gold',
-    nextTier: 'Platinum',
-    pointsNeeded: 3000,
-    rewards: [
-      { id: 1, name: 'Free Drink', pointsRequired: 150, description: 'Any zero-proof spritz or iced tea.' },
-      { id: 2, name: '₹150 Off', pointsRequired: 500, description: 'Apply to pickup or delivery orders.' },
-      { id: 3, name: 'Free Dessert', pointsRequired: 750, description: 'Chocolate cake or rotating dessert.' },
-      { id: 4, name: 'Priority Handoff', pointsRequired: 1200, description: 'Move one pickup order to priority prep.' },
-      { id: 5, name: 'Dinner Credit', pointsRequired: 3000, description: '₹1,000 credit for your next table-size order.' },
-    ]
-  });
-  const progress = Math.min((loyalty.points / loyalty.pointsNeeded) * 100, 100);
+  const [loyalty, setLoyalty] = useState(null);
+  const [rewards, setRewards] = useState([]);
+  const [tiers, setTiers] = useState([]);
 
-  const handleRedeem = (reward) => {
-    setMessage(`${reward.name} is ready to apply at checkout.`);
+  useEffect(() => {
+    const loadLoyalty = async () => {
+      const user = authService.getCurrentUser();
+      if (!user?.id) return;
+
+      try {
+        const [loyaltyRes, rewardsRes, tiersRes] = await Promise.all([
+          loyaltyService.getUserLoyalty(user.id),
+          loyaltyService.getRewards(user.id),
+          loyaltyService.getLoyaltyTiers(),
+        ]);
+
+        setLoyalty(loyaltyRes.data);
+        setRewards(rewardsRes.data || []);
+        setTiers(tiersRes.data || []);
+      } catch {
+        setMessage('Could not load loyalty data.');
+      }
+    };
+
+    loadLoyalty();
+  }, []);
+
+  const handleRedeem = async (reward) => {
+    try {
+      const user = authService.getCurrentUser();
+      if (!user?.id) return;
+
+      await loyaltyService.redeemReward(user.id, reward.rewardId || reward.id);
+      setMessage(`${reward.name} redeemed successfully.`);
+    } catch {
+      setMessage('Could not redeem this reward.');
+    }
   };
+
+  const currentTier = loyalty?.tier || 'Bronze';
+  const currentPoints = loyalty?.points || 0;
+
+  const nextTier = tiers.find((tier) => tier.minPoints > currentPoints) || tiers[tiers.length - 1] || null;
+  const pointsNeeded = nextTier ? Math.max(nextTier.minPoints - currentPoints, 0) : 0;
+  const progress = nextTier ? Math.min((currentPoints / nextTier.minPoints) * 100, 100) : 100;
 
   return (
     <div className="loyalty-dashboard">
@@ -34,26 +63,26 @@ function LoyaltyDashboard() {
 
         <div className="loyalty-stats">
           <div className="stat">
-            <h2>{loyalty.points}</h2>
+            <h2>{currentPoints}</h2>
             <p>Current Points</p>
           </div>
           <div className="stat">
-            <h2>{loyalty.tier}</h2>
+            <h2>{currentTier}</h2>
             <p>Member Tier</p>
           </div>
           <div className="stat">
-            <h2>{Math.max(loyalty.pointsNeeded - loyalty.points, 0)}</h2>
-            <p>Points to {loyalty.nextTier}</p>
+            <h2>{pointsNeeded}</h2>
+            <p>Points to {nextTier?.name || 'next tier'}</p>
           </div>
         </div>
       </section>
 
       <section className="section-shell loyalty-progress">
         <div className="progress-label">
-          <span>{loyalty.tier}</span>
-          <span>{loyalty.nextTier}</span>
+          <span>{currentTier}</span>
+          <span>{nextTier?.name || currentTier}</span>
         </div>
-        <div className="progress-bar" aria-label={`${Math.round(progress)} percent to ${loyalty.nextTier}`}>
+        <div className="progress-bar" aria-label={`${Math.round(progress)} percent to next tier`}>
           <span style={{ width: `${progress}%` }} />
         </div>
       </section>
@@ -66,12 +95,13 @@ function LoyaltyDashboard() {
           </div>
           {message && <span className="reward-message">{message}</span>}
         </div>
+
         <div className="rewards-grid">
-          {loyalty.rewards.map((reward) => (
+          {rewards.map((reward) => (
             <LoyaltyCard
               key={reward.id}
               reward={reward}
-              userPoints={loyalty.points}
+              userPoints={currentPoints}
               onRedeem={handleRedeem}
             />
           ))}
@@ -83,23 +113,18 @@ function LoyaltyDashboard() {
           <p className="eyebrow">Milestones</p>
           <h2>Loyalty tiers</h2>
         </div>
+
         <div className="tiers-info">
-          <div className="tier bronze">
-            <h3>Bronze</h3>
-            <p>0 - 999 Points</p>
-          </div>
-          <div className="tier silver">
-            <h3>Silver</h3>
-            <p>1,000 - 4,999 Points</p>
-          </div>
-          <div className="tier gold">
-            <h3>Gold</h3>
-            <p>5,000 - 9,999 Points</p>
-          </div>
-          <div className="tier platinum">
-            <h3>Platinum</h3>
-            <p>10,000+ Points</p>
-          </div>
+          {tiers.map((tier) => (
+            <div key={tier.id} className={`tier ${tier.name.toLowerCase()}`}>
+              <h3>{tier.name}</h3>
+              <p>
+                {tier.maxPoints === null
+                  ? `${tier.minPoints}+ Points`
+                  : `${tier.minPoints} - ${tier.maxPoints} Points`}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
     </div>

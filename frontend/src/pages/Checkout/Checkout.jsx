@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { formatCurrency } from '../../services/currencyService';
+import orderService from '../../services/orderService';
+import authService from '../../services/authService';
 import './Checkout.css';
 
 function Checkout() {
+  const navigate = useNavigate();
   const {
     items,
     subtotal,
@@ -15,6 +18,7 @@ function Checkout() {
     rewardPoints,
     clearCart,
   } = useCart();
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -28,26 +32,52 @@ function Checkout() {
     notes: '',
   });
   const [placedOrder, setPlacedOrder] = useState(null);
+  const [error, setError] = useState('');
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (items.length === 0) return;
 
-    setPlacedOrder({
-      id: `BOE-${Date.now().toString().slice(-6)}`,
-      items,
-      total,
-      fulfillment: formData.fulfillment,
-      time: formData.time,
-    });
-    clearCart();
+    const user = authService.getCurrentUser();
+    if (!user?.id) {
+      setError('Please sign in before placing an order.');
+      return;
+    }
+
+    try {
+      const orderPayload = {
+        userId: user.id,
+        totalAmount: total,
+        deliveryAddress:
+          formData.fulfillment === 'delivery'
+            ? `${formData.address}, ${formData.city}, ${formData.zipCode}`
+            : null,
+        paymentMethod: formData.paymentMethod,
+        notes: formData.notes,
+        estimatedDeliveryAt: null,
+        items: items.map((item) => ({
+          menuItemId: item.id,
+          quantity: item.quantity,
+          unitPrice: item.price,
+          notes: '',
+        })),
+      };
+
+      const response = await orderService.createOrder(orderPayload);
+      const newOrder = response.data;
+
+      setPlacedOrder(newOrder);
+      clearCart();
+    } catch {
+      setError('Could not place order.');
+    }
   };
 
   if (placedOrder) {
@@ -55,18 +85,16 @@ function Checkout() {
       <div className="checkout-page">
         <section className="section-shell confirmation">
           <p className="eyebrow">Order received</p>
-          <h1>{placedOrder.id}</h1>
-          <p>
-            Your {placedOrder.fulfillment} order is queued for {placedOrder.time === 'asap' ? 'the next available handoff' : placedOrder.time}.
-          </p>
+          <h1>#{placedOrder.id}</h1>
+          <p>Your order is queued and being prepared.</p>
           <div className="confirmation-panel">
             <div>
               <span>Items</span>
-              <strong>{placedOrder.items.reduce((sum, item) => sum + item.quantity, 0)}</strong>
+              <strong>{items.reduce((sum, item) => sum + item.quantity, 0)}</strong>
             </div>
             <div>
               <span>Total</span>
-              <strong>{formatCurrency(placedOrder.total)}</strong>
+              <strong>{formatCurrency(total)}</strong>
             </div>
             <div>
               <span>Status</span>
@@ -74,8 +102,12 @@ function Checkout() {
             </div>
           </div>
           <div className="confirmation-actions">
-            <Link to="/orders" className="btn primary">Track order</Link>
-            <Link to="/menu" className="btn secondary">Order more</Link>
+            <Link to="/orders" className="btn primary">
+              Track order
+            </Link>
+            <Link to="/menu" className="btn secondary">
+              Order more
+            </Link>
           </div>
         </section>
       </div>
@@ -89,7 +121,9 @@ function Checkout() {
           <p className="eyebrow">Checkout</p>
           <h1>Your cart is empty.</h1>
           <p>Add dishes before starting checkout.</p>
-          <Link to="/menu" className="btn primary">Browse menu</Link>
+          <Link to="/menu" className="btn primary">
+            Browse menu
+          </Link>
         </section>
       </div>
     );
@@ -101,46 +135,26 @@ function Checkout() {
         <p className="eyebrow">Secure handoff</p>
         <h1>Checkout</h1>
       </section>
-      
+
       <div className="checkout-container section-shell">
         <form className="checkout-form" onSubmit={handleSubmit}>
+          {error && <p className="form-status error">{error}</p>}
+
           <section className="form-section">
             <h2>Contact</h2>
-            
             <div className="form-group">
               <label htmlFor="fullName">Full name</label>
-              <input
-                id="fullName"
-                type="text"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleChange}
-                required
-              />
+              <input id="fullName" type="text" name="fullName" value={formData.fullName} onChange={handleChange} required />
             </div>
 
             <div className="form-group">
               <label htmlFor="email">Email address</label>
-              <input
-                id="email"
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
+              <input id="email" type="email" name="email" value={formData.email} onChange={handleChange} required />
             </div>
 
             <div className="form-group">
               <label htmlFor="phone">Phone</label>
-              <input
-                id="phone"
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                required
-              />
+              <input id="phone" type="tel" name="phone" value={formData.phone} onChange={handleChange} required />
             </div>
           </section>
 
@@ -148,12 +162,7 @@ function Checkout() {
             <h2>Handoff</h2>
             <div className="form-group">
               <label htmlFor="fulfillment">Fulfillment</label>
-              <select
-                id="fulfillment"
-                name="fulfillment"
-                value={formData.fulfillment}
-                onChange={handleChange}
-              >
+              <select id="fulfillment" name="fulfillment" value={formData.fulfillment} onChange={handleChange}>
                 <option value="delivery">Delivery</option>
                 <option value="pickup">Pickup</option>
               </select>
@@ -212,7 +221,6 @@ function Checkout() {
 
           <section className="form-section">
             <h2>Payment</h2>
-            
             <div className="form-group">
               <label htmlFor="paymentMethod">Payment method</label>
               <select
@@ -248,7 +256,9 @@ function Checkout() {
           <div className="checkout-items">
             {items.map((item) => (
               <div key={item.id}>
-                <span>{item.quantity}x {item.name}</span>
+                <span>
+                  {item.quantity}x {item.name}
+                </span>
                 <strong>{formatCurrency(item.price * item.quantity)}</strong>
               </div>
             ))}
