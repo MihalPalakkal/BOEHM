@@ -1,21 +1,34 @@
 import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
 import './Navbar.css';
 
-const navItems = [
+const generalNavItems = [
   { to: '/', label: 'Home' },
   { to: '/menu', label: 'Menu' },
+];
+
+const authenticatedNavItems = [
   { to: '/orders', label: 'Orders' },
   { to: '/loyalty', label: 'Rewards' },
-  { to: '/profile', label: 'Profile' },
 ];
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { itemCount } = useCart();
+  const { user, logout } = useAuth();
 
   const closeMenu = () => setIsMenuOpen(false);
+
+  const handleLogout = () => {
+    logout();
+    closeMenu();
+  };
+
+  const navItems = user 
+    ? [...generalNavItems, ...authenticatedNavItems]
+    : generalNavItems;
 
   return (
     <header className="site-header">
@@ -47,9 +60,22 @@ function Navbar() {
             <span>Cart</span>
             <strong>{itemCount}</strong>
           </NavLink>
-          <NavLink to="/login" className="account-link" onClick={closeMenu}>
-            Sign in
-          </NavLink>
+          
+          {user ? (
+            <div className="user-menu" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <NavLink to="/profile" className="account-link" onClick={closeMenu}>
+                Hi, {user.name ? user.name.split(' ')[0] : 'User'}
+              </NavLink>
+              <button onClick={handleLogout} className="account-link" style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
+                Sign out
+              </button>
+            </div>
+          ) : (
+            <NavLink to="/login" className="account-link" onClick={closeMenu}>
+              Sign in
+            </NavLink>
+          )}
+
           <button
             className={`menu-toggle ${isMenuOpen ? 'active' : ''}`}
             type="button"

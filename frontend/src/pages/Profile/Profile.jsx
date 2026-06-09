@@ -5,17 +5,13 @@ import { formatCurrency } from '../../services/currencyService';
 import { useCart } from '../../context/CartContext';
 import authService from '../../services/authService';
 import userService from '../../services/userService';
+import { useAuth } from '../../context/AuthContext';
 import './Profile.css';
 
 function Profile() {
   const { addItem } = useCart();
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const favoriteItems = menuItems.slice(0, 3);
-
-  useEffect(() => {
-    const currentUser = authService.getCurrentUser();
-    setUser(currentUser);
-  }, []);
 
   return (
     <div className="profile-page">

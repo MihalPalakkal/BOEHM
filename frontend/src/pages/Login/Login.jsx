@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import authService from '../../services/authService';
+import { useAuth } from '../../context/AuthContext';
 import './Login.css';
 
 function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -27,8 +29,7 @@ function Login() {
       const user = response.data?.user;
       const token = response.data?.token;
 
-      if (token) authService.setToken(token);
-      if (user) authService.setCurrentUser(user);
+      login(user, token);
 
       setStatus({ type: 'success', message: 'Signed in. Redirecting...' });
       navigate('/');
