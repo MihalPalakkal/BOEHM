@@ -13,7 +13,7 @@ app.use(express.urlencoded({ extended: true }));
 const authRoutes = require('./auth/auth.routes');
 const orderRoutes = require('./orders/order.routes');
 const loyaltyRoutes = require('./loyalty/loyalty.routes');
-const userRoutes = require('./users/user.routes');
+const userRoutes = require('./users/users.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/orders', orderRoutes);
