@@ -205,3 +205,18 @@ exports.addPoints = async (userId, points, reason = 'order_placed', referenceId 
     connection.release();
   }
 };
+
+exports.getRewardsCatalogue = async () => {
+  const connection = await pool.getConnection();
+  try {
+    const [rows] = await connection.query(
+      `SELECT id, name, description, points_required AS pointsRequired
+       FROM rewards
+       WHERE is_active = TRUE
+       ORDER BY points_required ASC`
+    );
+    return rows;
+  } finally {
+    connection.release();
+  }
+};

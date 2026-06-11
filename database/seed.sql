@@ -163,13 +163,13 @@ INSERT INTO rewards (name, description, points_required, is_active) VALUES
 -- -----------------------------------------------------------
 INSERT INTO users (email, password, name, phone) VALUES
   ('alice@example.com',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lHi2',
+   '$2a$10$dvCXglLn9If7EvLEAuHJW.OnT0t2wkqITalWItiaXElkc9wO22M8W',
    'Alice Johnson', '555-0101'),
   ('bob@example.com',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lHi2',
+   '$2a$10$dvCXglLn9If7EvLEAuHJW.OnT0t2wkqITalWItiaXElkc9wO22M8W',
    'Bob Smith', '555-0102'),
   ('carol@example.com',
-   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lHi2',
+   '$2a$10$dvCXglLn9If7EvLEAuHJW.OnT0t2wkqITalWItiaXElkc9wO22M8W',
    'Carol White', '555-0103');
 
 -- -----------------------------------------------------------

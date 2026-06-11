@@ -1,4 +1,5 @@
 const pool = require('../config/database');
+const loyaltyService = require('../loyalty/loyalty.service');
 
 exports.getOrders = async (userId) => {
   const connection = await pool.getConnection();
@@ -14,7 +15,32 @@ exports.getOrders = async (userId) => {
       [userId]
     );
 
-    return orders;
+    if (orders.length === 0) return orders;
+
+    // Batch-fetch all items for these orders
+    const orderIds = orders.map((o) => o.id);
+    const [allItems] = await connection.query(
+      `SELECT oi.order_id AS orderId, oi.menu_item_id AS menuItemId,
+              oi.quantity, oi.unit_price AS unitPrice, oi.subtotal,
+              mi.name, mi.image_url AS imageUrl
+       FROM order_items oi
+       JOIN menu_items mi ON mi.id = oi.menu_item_id
+       WHERE oi.order_id IN (?)`,
+      [orderIds]
+    );
+
+    // Group items by order id
+    const itemsByOrder = {};
+    for (const item of allItems) {
+      if (!itemsByOrder[item.orderId]) itemsByOrder[item.orderId] = [];
+      itemsByOrder[item.orderId].push(item);
+    }
+
+    // Attach items to each order
+    return orders.map((order) => ({
+      ...order,
+      items: itemsByOrder[order.id] || [],
+    }));
   } finally {
     connection.release();
   }
@@ -86,6 +112,17 @@ exports.createOrder = async (orderData) => {
     await connection.commit();
 
     const createdOrder = await exports.getOrderById(orderId);
+
+    // Award loyalty points: 1 point per ₹10 spent (fire-and-forget)
+    try {
+      const pointsEarned = Math.floor(Number(totalAmount) / 10);
+      if (pointsEarned > 0 && userId) {
+        await loyaltyService.addPoints(userId, pointsEarned, 'order_placed', orderId);
+      }
+    } catch (loyaltyErr) {
+      console.error('Loyalty points award failed (non-fatal):', loyaltyErr.message);
+    }
+
     return createdOrder;
   } catch (error) {
     await connection.rollback();

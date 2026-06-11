@@ -2,27 +2,37 @@ const firebase = require('./firebase');
 
 exports.sendNotification = async (userId, title, message) => {
   try {
-    // Send notification via Firebase
     await firebase.sendNotification(userId, title, message);
     return { success: true, message: 'Notification sent' };
   } catch (error) {
-    console.error('Error sending notification:', error);
-    throw error;
+    // Log but never throw — notification failures must not break calling flows.
+    console.error('Error sending notification:', error.message);
+    return { success: false, message: error.message };
   }
 };
 
 exports.sendOrderStatusNotification = async (userId, orderId, status) => {
   const messages = {
     pending: 'Your order has been received',
-    processing: 'Your order is being prepared',
+    confirmed: 'Your order has been confirmed',
+    preparing: 'Your order is being prepared',
     ready: 'Your order is ready for pickup',
-    completed: 'Your order has been completed',
-    cancelled: 'Your order has been cancelled'
+    out_for_delivery: 'Your order is out for delivery',
+    delivered: 'Your order has been delivered',
+    cancelled: 'Your order has been cancelled',
   };
-  
-  return exports.sendNotification(userId, 'Order Update', messages[status] || 'Order status updated');
+
+  return exports.sendNotification(
+    userId,
+    'Order Update',
+    messages[status] || 'Order status updated'
+  );
 };
 
 exports.sendLoyaltyNotification = async (userId, pointsEarned) => {
-  return exports.sendNotification(userId, 'Loyalty Points', `You earned ${pointsEarned} points!`);
+  return exports.sendNotification(
+    userId,
+    'Loyalty Points',
+    `You earned ${pointsEarned} points!`
+  );
 };

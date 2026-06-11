@@ -48,3 +48,12 @@ exports.getUserPoints = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+exports.getRewardsCatalogue = async (req, res) => {
+  try {
+    const rewards = await loyaltyService.getRewardsCatalogue();
+    res.status(200).json(rewards);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
