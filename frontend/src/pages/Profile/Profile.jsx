@@ -1,17 +1,50 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { menuItems } from '../../services/menuService';
 import { formatCurrency } from '../../services/currencyService';
 import { useCart } from '../../context/CartContext';
 import authService from '../../services/authService';
 import userService from '../../services/userService';
+import loyaltyService from '../../services/loyaltyService';
 import { useAuth } from '../../context/AuthContext';
 import './Profile.css';
 
 function Profile() {
   const { addItem } = useCart();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const favoriteItems = menuItems.slice(0, 3);
+
+  const [profile, setProfile] = useState(null);
+  const [loyaltyData, setLoyaltyData] = useState(null);
+
+  useEffect(() => {
+    if (!user?.id) {
+      navigate('/login');
+      return;
+    }
+
+    const loadProfile = async () => {
+      try {
+        const [profileRes, loyaltyRes] = await Promise.all([
+          userService.getUserProfile(user.id),
+          loyaltyService.getUserPoints(user.id),
+        ]);
+        setProfile(profileRes.data);
+        setLoyaltyData(loyaltyRes.data);
+      } catch (err) {
+        console.error('Failed to load profile:', err.message);
+      }
+    };
+
+    loadProfile();
+  }, [user, navigate]);
+
+  const displayName = profile?.name || user?.name || 'Guest';
+  const displayEmail = profile?.email || user?.email || '-';
+  const displayPhone = profile?.phone || '-';
+  const displayTier = loyaltyData?.tier || 'Bronze';
+  const displayPoints = loyaltyData?.points ?? 0;
 
   return (
     <div className="profile-page">
@@ -24,7 +57,7 @@ function Profile() {
         <div className="profile-card">
           <div className="profile-header">
             <div className="profile-avatar">
-              {(user?.name || 'User')
+              {displayName
                 .split(' ')
                 .map((part) => part[0])
                 .join('')
@@ -32,39 +65,26 @@ function Profile() {
                 .toUpperCase()}
             </div>
             <div className="profile-info">
-              <h2>{user?.name || 'Guest'}</h2>
-              <p>{user?.tier || 'Bronze'} Member</p>
+              <h2>{displayName}</h2>
+              <p>{displayTier} Member</p>
             </div>
           </div>
 
           <div className="profile-details">
             <div className="detail-item">
               <label>Email</label>
-              <p>{user?.email || '-'}</p>
+              <p>{displayEmail}</p>
             </div>
 
             <div className="detail-item">
               <label>Phone</label>
-              <p>{user?.phone || '-'}</p>
-            </div>
-
-            <div className="detail-item">
-              <label>Default address</label>
-              <p>{user?.address || '-'}</p>
+              <p>{displayPhone}</p>
             </div>
 
             <div className="detail-item">
               <label>Loyalty points</label>
-              <p className="loyalty-points">{user?.loyaltyPoints || 0}</p>
+              <p className="loyalty-points">{displayPoints}</p>
             </div>
-          </div>
-
-          <div className="preference-chips">
-            {(user?.preferences || ['No plastic cutlery', 'Text updates', 'Leave at door']).map(
-              (preference) => (
-                <span key={preference}>{preference}</span>
-              )
-            )}
           </div>
 
           <button className="btn-edit" type="button">

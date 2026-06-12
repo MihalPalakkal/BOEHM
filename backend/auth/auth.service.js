@@ -25,6 +25,16 @@ exports.register = async (userData) => {
       [email, hashedPassword, name]
     );
 
+    // Initialize loyalty account for new user (Bronze tier = id 1, 0 points)
+    try {
+      await connection.query(
+        'INSERT INTO loyalty_points (user_id, points, tier_id) VALUES (?, 0, 1)',
+        [result.insertId]
+      );
+    } catch (loyaltyErr) {
+      console.error('Loyalty init failed (non-fatal):', loyaltyErr.message);
+    }
+
     const token = jwt.sign(
       { id: result.insertId, email, name },
       JWT_SECRET,

@@ -20,6 +20,10 @@ export const loyaltyService = {
   getUserPoints: (userId) => {
     return api.get(`/loyalty/points/${userId}`);
   },
+
+  getRewardsCatalogue: () => {
+    return api.get('/loyalty/rewards-catalogue');
+  },
 };
 
-export default loyaltyService;
+export default loyaltyService;
