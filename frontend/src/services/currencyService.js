@@ -5,4 +5,6 @@ export const formatCurrency = (amount) =>
     maximumFractionDigits: 0,
   }).format(amount);
 
+export const getRewardPoints = (amount) => Math.floor(Number(amount || 0) / 10);
+
 export default formatCurrency;

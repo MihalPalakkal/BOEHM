@@ -94,13 +94,16 @@ function Home() {
 
         <div className="today-picks">
           {todayPicks.map((item) => (
-            <button key={item.id} type="button" onClick={() => addItem(item)}>
+            <article key={item.id} className="today-pick">
               <img src={item.image} alt="" />
               <span>
                 <strong>{item.name}</strong>
                 <small>{formatCurrency(item.price)} - {item.prepTime}</small>
               </span>
-            </button>
+              <button type="button" onClick={() => addItem(item)}>
+                Order
+              </button>
+            </article>
           ))}
         </div>
       </section>

@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
-import { formatCurrency } from '../../services/currencyService';
+import { formatCurrency, getRewardPoints } from '../../services/currencyService';
 import orderService from '../../services/orderService';
 import authService from '../../services/authService';
+import userService from '../../services/userService';
+import { useAuth } from '../../context/AuthContext';
 import './Checkout.css';
 
+const onlyDigits = (value, maxLength) => value.replace(/\D/g, '').slice(0, maxLength);
+
 function Checkout() {
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const {
     items,
     subtotal,
@@ -17,6 +21,8 @@ function Checkout() {
     total,
     rewardPoints,
     clearCart,
+    removeItem,
+    updateQuantity,
   } = useCart();
 
   const [formData, setFormData] = useState({
@@ -32,18 +38,63 @@ function Checkout() {
     notes: '',
   });
   const [placedOrder, setPlacedOrder] = useState(null);
+  const [orderSnapshot, setOrderSnapshot] = useState(null);
   const [error, setError] = useState('');
 
+  useEffect(() => {
+    const autofillContact = async () => {
+      const currentUser = user || authService.getCurrentUser();
+
+      if (!currentUser?.id) return;
+
+      setFormData((currentData) => ({
+        ...currentData,
+        fullName: currentData.fullName || currentUser.name || '',
+        email: currentData.email || currentUser.email || '',
+      }));
+
+      try {
+        const response = await userService.getUserProfile(currentUser.id);
+        const profile = response.data || {};
+
+        setFormData((currentData) => ({
+          ...currentData,
+          fullName: currentData.fullName || profile.name || currentUser.name || '',
+          email: currentData.email || profile.email || currentUser.email || '',
+          phone: currentData.phone || onlyDigits(profile.phone || '', 10),
+        }));
+      } catch {
+        // Checkout should still work when profile autofill is unavailable.
+      }
+    };
+
+    autofillContact();
+  }, [user]);
+
+  const itemCount = useMemo(
+    () => items.reduce((sum, item) => sum + item.quantity, 0),
+    [items],
+  );
+
   const handleChange = (e) => {
+    const { name, value } = e.target;
+    const nextValue =
+      name === 'phone'
+        ? onlyDigits(value, 10)
+        : name === 'zipCode'
+          ? onlyDigits(value, 6)
+          : value;
+
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: nextValue,
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (items.length === 0) return;
+    setError('');
 
     const user = authService.getCurrentUser();
     if (!user?.id) {
@@ -51,7 +102,23 @@ function Checkout() {
       return;
     }
 
+    if (formData.phone.length !== 10) {
+      setError('Enter a valid 10-digit phone number.');
+      return;
+    }
+
+    if (formData.fulfillment === 'delivery' && formData.zipCode.length !== 6) {
+      setError('Enter a valid 6-digit PIN code.');
+      return;
+    }
+
     try {
+      const snapshot = {
+        itemCount,
+        total,
+        rewardPoints,
+        items: items.map((item) => ({ ...item })),
+      };
       const orderPayload = {
         userId: user.id,
         totalAmount: total,
@@ -73,6 +140,7 @@ function Checkout() {
       const response = await orderService.createOrder(orderPayload);
       const newOrder = response.data;
 
+      setOrderSnapshot(snapshot);
       setPlacedOrder(newOrder);
       clearCart();
     } catch {
@@ -90,15 +158,15 @@ function Checkout() {
           <div className="confirmation-panel">
             <div>
               <span>Items</span>
-              <strong>{items.reduce((sum, item) => sum + item.quantity, 0)}</strong>
+              <strong>{orderSnapshot?.itemCount || 0}</strong>
             </div>
             <div>
               <span>Total</span>
-              <strong>{formatCurrency(total)}</strong>
+              <strong>{formatCurrency(orderSnapshot?.total || 0)}</strong>
             </div>
             <div>
-              <span>Status</span>
-              <strong>Received</strong>
+              <span>Rewards</span>
+              <strong>{orderSnapshot?.rewardPoints || 0} pts</strong>
             </div>
           </div>
           <div className="confirmation-actions">
@@ -132,8 +200,13 @@ function Checkout() {
   return (
     <div className="checkout-page">
       <section className="section-shell page-heading">
-        <p className="eyebrow">Secure handoff</p>
-        <h1>Checkout</h1>
+        <div>
+          <p className="eyebrow">Secure handoff</p>
+          <h1>Checkout</h1>
+        </div>
+        <Link to="/cart" className="text-link">
+          Back to cart
+        </Link>
       </section>
 
       <div className="checkout-container section-shell">
@@ -154,7 +227,18 @@ function Checkout() {
 
             <div className="form-group">
               <label htmlFor="phone">Phone</label>
-              <input id="phone" type="tel" name="phone" value={formData.phone} onChange={handleChange} required />
+              <input
+                id="phone"
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                inputMode="numeric"
+                pattern="[0-9]{10}"
+                maxLength="10"
+                placeholder="10-digit mobile number"
+                required
+              />
             </div>
           </section>
 
@@ -202,6 +286,10 @@ function Checkout() {
                   name="zipCode"
                   value={formData.zipCode}
                   onChange={handleChange}
+                  inputMode="numeric"
+                  pattern="[0-9]{6}"
+                  maxLength="6"
+                  placeholder="6-digit PIN code"
                   required={formData.fulfillment === 'delivery'}
                 />
               </div>
@@ -255,14 +343,44 @@ function Checkout() {
           <h2>Order summary</h2>
           <div className="checkout-items">
             {items.map((item) => (
-              <div key={item.id}>
-                <span>
-                  {item.quantity}x {item.name}
-                </span>
+              <article key={item.id} className="checkout-item">
+                <div>
+                  <span>{item.name}</span>
+                  <small>
+                    {formatCurrency(item.price)} each - {getRewardPoints(item.price * item.quantity)} pts
+                  </small>
+                </div>
+                <div className="checkout-item-actions">
+                  <button
+                    type="button"
+                    aria-label={`Decrease ${item.name}`}
+                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                  >
+                    -
+                  </button>
+                  <strong>{item.quantity}</strong>
+                  <button
+                    type="button"
+                    aria-label={`Increase ${item.name}`}
+                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                  >
+                    +
+                  </button>
+                </div>
                 <strong>{formatCurrency(item.price * item.quantity)}</strong>
-              </div>
+                <button
+                  className="checkout-remove"
+                  type="button"
+                  onClick={() => removeItem(item.id)}
+                >
+                  Remove
+                </button>
+              </article>
             ))}
           </div>
+          <Link to="/cart" className="text-link">
+            Edit full cart
+          </Link>
           <div className="summary-row">
             <span>Subtotal</span>
             <span>{formatCurrency(subtotal)}</span>

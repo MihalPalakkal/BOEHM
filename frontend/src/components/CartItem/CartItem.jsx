@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatCurrency } from '../../services/currencyService';
+import { formatCurrency, getRewardPoints } from '../../services/currencyService';
 import './CartItem.css';
 
 function CartItem({ item, onRemove, onUpdateQuantity }) {
@@ -10,6 +10,7 @@ function CartItem({ item, onRemove, onUpdateQuantity }) {
       <div className="item-details">
         <h3>{item.name}</h3>
         <p>{item.category} - {item.prepTime}</p>
+        <p>{getRewardPoints(item.price * item.quantity)} reward points</p>
         <p className="item-price">{formatCurrency(item.price)}</p>
       </div>
       

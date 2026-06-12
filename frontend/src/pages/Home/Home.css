@@ -141,9 +141,9 @@
   gap: 12px;
 }
 
-.today-picks button {
+.today-pick {
   display: grid;
-  grid-template-columns: 108px 1fr;
+  grid-template-columns: 108px minmax(0, 1fr) auto;
   gap: 14px;
   align-items: center;
   padding: 12px;
@@ -152,6 +152,20 @@
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
+}
+
+.today-pick button {
+  min-height: 40px;
+  padding: 0 16px;
+  color: #fff;
+  background: var(--ink);
+  border: 0;
+  border-radius: var(--radius);
+  font-weight: 900;
+}
+
+.today-pick button:hover {
+  background: var(--tomato);
 }
 
 .today-picks img {
@@ -200,8 +214,13 @@
     grid-template-columns: 1fr;
   }
 
-  .today-picks button {
+  .today-pick {
     grid-template-columns: 88px 1fr;
+  }
+
+  .today-pick button {
+    grid-column: 2;
+    width: fit-content;
   }
 
   .today-picks img {

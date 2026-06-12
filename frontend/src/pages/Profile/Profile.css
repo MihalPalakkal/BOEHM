@@ -125,9 +125,9 @@
   gap: 10px;
 }
 
-.profile-favorites button {
+.favorite-card {
   display: grid;
-  grid-template-columns: 66px 1fr;
+  grid-template-columns: 66px minmax(0, 1fr) auto;
   gap: 10px;
   align-items: center;
   padding: 8px;
@@ -135,6 +135,20 @@
   background: #fff;
   border: 1px solid var(--line);
   border-radius: var(--radius);
+}
+
+.favorite-card button {
+  min-height: 36px;
+  padding: 0 12px;
+  color: #fff;
+  background: var(--ink);
+  border: 0;
+  border-radius: 7px;
+  font-weight: 900;
+}
+
+.favorite-card button:hover {
+  background: var(--tomato);
 }
 
 .profile-favorites img {
@@ -158,5 +172,14 @@
   .profile-container,
   .profile-details {
     grid-template-columns: 1fr;
+  }
+
+  .favorite-card {
+    grid-template-columns: 66px 1fr;
+  }
+
+  .favorite-card button {
+    grid-column: 2;
+    width: fit-content;
   }
 }

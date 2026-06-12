@@ -8,6 +8,7 @@ import Menu from './pages/Menu/Menu';
 import Customers from './pages/Customers/Customers';
 import Loyalty from './pages/Loyalty/Loyalty';
 import Analytics from './pages/Analytics/Analytics';
+import Dashboard from './pages/Dashboard/Dashboard';
 
 function App() {
   return (
@@ -20,7 +21,7 @@ function App() {
             <DashboardLayout />
           </ProtectedRoute>
         }>
-          <Route index element={<Navigate to="/admin/orders" replace />} />
+          <Route index element={<Dashboard />} />
           <Route path="orders" element={<Orders />} />
           <Route path="menu" element={<Menu />} />
           <Route path="customers" element={<Customers />} />

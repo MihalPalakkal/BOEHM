@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatCurrency } from '../../services/currencyService';
+import { formatCurrency, getRewardPoints } from '../../services/currencyService';
 import './ProductCard.css';
 
 function ProductCard({ product, onAddToCart, quantity = 0, compact = false }) {
@@ -21,6 +21,7 @@ function ProductCard({ product, onAddToCart, quantity = 0, compact = false }) {
         <div className="product-meta" aria-label={`${product.prepTime} preparation time`}>
           <span>{product.prepTime}</span>
           <span>{product.calories} cal</span>
+          <span>{getRewardPoints(product.price)} pts</span>
         </div>
 
         <div className="product-tags">
