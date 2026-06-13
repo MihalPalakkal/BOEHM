@@ -1,13 +1,7 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import './Footer.css';
 
 function Footer() {
-  const handleNewsletterSubmit = (event) => {
-    event.preventDefault();
-    event.currentTarget.reset();
-  };
-
   return (
     <footer className="footer" aria-label="Restaurant information">
       <div className="footer-container section-shell">
@@ -37,20 +31,6 @@ function Footer() {
           <p>Fri-Sat: 11:00 AM - 11:30 PM</p>
           <p>Sun: 12:00 PM - 9:00 PM</p>
         </div>
-
-        <form className="footer-signup" onSubmit={handleNewsletterSubmit}>
-          <h4>Kitchen notes</h4>
-          <label htmlFor="footer-email">Newsletter email</label>
-          <div>
-            <input id="footer-email" type="email" placeholder="you@example.com" required />
-            <button type="submit">Join</button>
-          </div>
-        </form>
-      </div>
-
-      <div className="footer-bottom section-shell">
-        <p>BOEHM Restaurant. Direct ordering frontend.</p>
-        <p>info@boehm.com - +91 98765 43210</p>
       </div>
     </footer>
   );
