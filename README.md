@@ -15,7 +15,7 @@ A full-stack web application for restaurant ordering with integrated loyalty pro
 ## Tech Stack
 
 ### Frontend
-- React 18
+- React 19
 - Vite
 - React Router
 - Axios
@@ -42,7 +42,13 @@ git clone https://github.com/MihalPalakkal/BOEHM.git
 cd BOEHM
 ```
 
-2. **Backend Setup:**
+2. **Database Setup:**
+```bash
+mysql -u root -p < database/schema.sql
+mysql -u root -p boehm < database/seed.sql
+```
+
+3. **Backend Setup:**
 ```bash
 cd backend
 npm install
@@ -50,18 +56,19 @@ npm install
 npm run dev
 ```
 
-3. **Frontend Setup:**
+If demo users already exist in an older local database but cannot sign in, reset their bcrypt passwords:
+
+```bash
+cd backend
+npm run seed:demo-users
+```
+
+4. **Frontend Setup:**
 ```bash
 cd frontend
 npm install
 # Create .env file
 npm run dev
-```
-
-4. **Database Setup:**
-```bash
-mysql -u root -p < database/schema.sql
-mysql -u root -p boehm < database/seed.sql
 ```
 
 ## Documentation

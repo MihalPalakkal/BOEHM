@@ -7,7 +7,7 @@
 
 .footer-container {
   display: grid;
-  grid-template-columns: 1.15fr 0.65fr 0.8fr 1fr;
+  grid-template-columns: minmax(260px, 1.2fr) minmax(140px, 0.6fr) minmax(180px, 0.8fr);
   gap: 28px;
 }
 
@@ -19,8 +19,7 @@
 }
 
 .footer p,
-.footer a,
-.footer label {
+.footer a {
   color: rgba(255, 255, 255, 0.72);
 }
 
@@ -39,42 +38,6 @@
   color: #fff;
 }
 
-.footer-signup {
-  display: grid;
-  align-content: start;
-  gap: 10px;
-}
-
-.footer-signup div {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 8px;
-}
-
-.footer-signup input {
-  min-width: 0;
-  border-color: rgba(255, 255, 255, 0.16);
-}
-
-.footer-signup button {
-  min-height: 46px;
-  padding: 0 16px;
-  color: #fff;
-  background: var(--tomato);
-  border: 0;
-  border-radius: var(--radius);
-  font-weight: 900;
-}
-
-.footer-bottom {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-  margin-top: 34px;
-  padding-top: 22px;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-}
-
 @media (max-width: 860px) {
   .footer-container {
     grid-template-columns: 1fr 1fr;
@@ -82,9 +45,7 @@
 }
 
 @media (max-width: 560px) {
-  .footer-container,
-  .footer-bottom {
+  .footer-container {
     grid-template-columns: 1fr;
-    flex-direction: column;
   }
 }

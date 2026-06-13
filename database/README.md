@@ -14,6 +14,13 @@ mysql -u root -p < database/schema.sql
 mysql -u root -p boehm < database/seed.sql
 ```
 
+If an old local database already has the demo users but login fails, reset the demo login hashes through the backend config:
+
+```bash
+cd backend
+npm run seed:demo-users
+```
+
 ---
 
 ## Schema Overview
@@ -106,6 +113,19 @@ DB_NAME=boehm
 | alice@example.com | password123 | 1 250 | Silver |
 | bob@example.com | password123 | 450 | Bronze |
 | carol@example.com | password123 | 5 300 | Gold |
+
+---
+
+## Resetting Demo Logins
+
+Use this when a contributor has an older local database where `alice@example.com`, `bob@example.com`, or `carol@example.com` exists but `password123` does not work:
+
+```bash
+cd backend
+npm run seed:demo-users
+```
+
+The command uses `backend/.env`, updates the three demo users, and resets their password to `password123`.
 
 ---
 
