@@ -27,10 +27,6 @@ const TopBar = () => {
       </div>
       
       <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-        <button style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', position: 'relative' }}>
-          <Bell size={20} />
-          <span style={{ position: 'absolute', top: '-4px', right: '-4px', width: '8px', height: '8px', backgroundColor: 'var(--accent-primary)', borderRadius: '50%' }}></span>
-        </button>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem', borderRadius: '8px', backgroundColor: 'rgba(255,255,255,0.05)' }}>
           <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
