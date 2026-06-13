@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Lock, Mail } from 'lucide-react';
+import { setAdminSession } from '../../api/adminAuth';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -20,7 +21,7 @@ const Login = () => {
       if (email === 'admin@boehm.com' && password === 'admin123') {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 800));
-        localStorage.setItem('adminToken', 'dummy-test-token-123');
+        setAdminSession();
         navigate('/admin');
       } else {
         throw new Error('Invalid email or password. Use admin@boehm.com / admin123');
