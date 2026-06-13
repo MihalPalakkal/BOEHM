@@ -5,6 +5,10 @@ export const adminService = {
   updateOrderStatus: (orderId, status) =>
     api.patch(`/admin/orders/${orderId}/status`, { status }),
 
+  getCustomers: (params = {}) => api.get('/admin/customers', { params }),
+  adjustCustomerPoints: (userId, adjustment) =>
+    api.patch(`/admin/customers/${userId}/points`, adjustment),
+
   getMenuItems: () => api.get('/admin/menu'),
   createMenuItem: (item) => api.post('/admin/menu', item),
   updateMenuItem: (itemId, item) => api.put(`/admin/menu/${itemId}`, item),

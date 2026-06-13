@@ -57,6 +57,19 @@ const getTagsByItemIds = async (connection, itemIds) => {
   }, {});
 };
 
+const getTierByPoints = async (connection, points) => {
+  const [tiers] = await connection.query(
+    `SELECT id, name, min_points AS minPoints, max_points AS maxPoints
+     FROM loyalty_tiers
+     ORDER BY min_points ASC`,
+  );
+
+  return tiers.find((tier) => {
+    if (tier.maxPoints === null) return points >= tier.minPoints;
+    return points >= tier.minPoints && points <= tier.maxPoints;
+  }) || tiers[0];
+};
+
 exports.getOrders = async ({ status = 'all', search = '' } = {}) => {
   const connection = await pool.getConnection();
   try {
@@ -111,6 +124,127 @@ exports.getOrders = async ({ status = 'all', search = '' } = {}) => {
       totalAmount: Number(order.totalAmount),
       items: itemsByOrder[order.id] || [],
     }));
+  } finally {
+    connection.release();
+  }
+};
+
+exports.getCustomers = async ({ search = '' } = {}) => {
+  const connection = await pool.getConnection();
+  try {
+    const values = [];
+    let whereClause = 'WHERE u.is_active = TRUE';
+
+    if (search) {
+      whereClause += ' AND (u.name LIKE ? OR u.email LIKE ? OR u.phone LIKE ?)';
+      const pattern = `%${search}%`;
+      values.push(pattern, pattern, pattern);
+    }
+
+    const [customers] = await connection.query(
+      `SELECT u.id, u.name, u.email, u.phone,
+              u.created_at AS memberSince,
+              COALESCE(lp.points, 0) AS points,
+              COALESCE(lt.name, 'Bronze') AS tier,
+              COUNT(o.id) AS orderCount,
+              COALESCE(SUM(o.total_amount), 0) AS totalSpend,
+              MAX(o.created_at) AS lastOrderAt
+       FROM users u
+       LEFT JOIN loyalty_points lp ON lp.user_id = u.id
+       LEFT JOIN loyalty_tiers lt ON lt.id = lp.tier_id
+       LEFT JOIN orders o ON o.user_id = u.id
+       ${whereClause}
+       GROUP BY u.id, u.name, u.email, u.phone, u.created_at, lp.points, lt.name
+       ORDER BY lastOrderAt DESC, u.created_at DESC`,
+      values,
+    );
+
+    if (customers.length === 0) return [];
+
+    const customerIds = customers.map((customer) => customer.id);
+    const [orders] = await connection.query(
+      `SELECT id, user_id AS userId, status, total_amount AS totalAmount,
+              payment_method AS paymentMethod, created_at AS createdAt
+       FROM orders
+       WHERE user_id IN (?)
+       ORDER BY created_at DESC`,
+      [customerIds],
+    );
+
+    const recentOrdersByCustomer = orders.reduce((orderMap, order) => {
+      if (!orderMap[order.userId]) orderMap[order.userId] = [];
+      if (orderMap[order.userId].length < 3) {
+        orderMap[order.userId].push({
+          ...order,
+          totalAmount: Number(order.totalAmount),
+        });
+      }
+      return orderMap;
+    }, {});
+
+    return customers.map((customer) => ({
+      ...customer,
+      phone: customer.phone || '',
+      points: Number(customer.points),
+      orderCount: Number(customer.orderCount),
+      totalSpend: Number(customer.totalSpend),
+      recentOrders: recentOrdersByCustomer[customer.id] || [],
+    }));
+  } finally {
+    connection.release();
+  }
+};
+
+exports.adjustCustomerPoints = async (userId, adjustment) => {
+  const connection = await pool.getConnection();
+  try {
+    const amount = Number(adjustment.amount || 0);
+    const reason = String(adjustment.reason || 'admin_adjustment').trim() || 'admin_adjustment';
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      throw new Error('Point adjustment amount must be greater than zero');
+    }
+
+    await connection.beginTransaction();
+
+    const [users] = await connection.query('SELECT id FROM users WHERE id = ? AND is_active = TRUE', [userId]);
+    if (users.length === 0) throw new Error('Customer not found');
+
+    const [loyaltyRows] = await connection.query(
+      'SELECT points FROM loyalty_points WHERE user_id = ?',
+      [userId],
+    );
+
+    const currentPoints = loyaltyRows[0]?.points || 0;
+    const signedAmount = adjustment.type === 'subtract' ? -Math.min(amount, currentPoints) : amount;
+    const nextPoints = Math.max(0, currentPoints + signedAmount);
+    const tier = await getTierByPoints(connection, nextPoints);
+
+    if (loyaltyRows.length === 0) {
+      await connection.query(
+        'INSERT INTO loyalty_points (user_id, points, tier_id) VALUES (?, ?, ?)',
+        [userId, nextPoints, tier.id],
+      );
+    } else {
+      await connection.query(
+        'UPDATE loyalty_points SET points = ?, tier_id = ? WHERE user_id = ?',
+        [nextPoints, tier.id, userId],
+      );
+    }
+
+    await connection.query(
+      `INSERT INTO loyalty_points_history
+       (user_id, change_amount, balance_after, reason, reference_id)
+       VALUES (?, ?, ?, ?, NULL)`,
+      [userId, signedAmount, nextPoints, reason],
+    );
+
+    await connection.commit();
+    const customers = await exports.getCustomers();
+    return customers.find((customer) => Number(customer.id) === Number(userId));
+  } catch (error) {
+    await connection.rollback();
+    throw error;
   } finally {
     connection.release();
   }

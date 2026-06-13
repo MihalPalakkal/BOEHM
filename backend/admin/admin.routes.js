@@ -9,6 +9,9 @@ router.use(adminMiddleware);
 router.get('/orders', adminController.getOrders);
 router.patch('/orders/:orderId/status', adminController.updateOrderStatus);
 
+router.get('/customers', adminController.getCustomers);
+router.patch('/customers/:userId/points', adminController.adjustCustomerPoints);
+
 router.get('/menu', adminController.getMenuItems);
 router.post('/menu', adminController.createMenuItem);
 router.put('/menu/:itemId', adminController.updateMenuItem);

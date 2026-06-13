@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { formatCurrency, getRewardPoints } from '../../services/currencyService';
@@ -9,6 +9,7 @@ import { useAuth } from '../../context/AuthContext';
 import './Checkout.css';
 
 const onlyDigits = (value, maxLength) => value.replace(/\D/g, '').slice(0, maxLength);
+const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
 function Checkout() {
   const { user } = useAuth();
@@ -34,12 +35,14 @@ function Checkout() {
     zipCode: '',
     fulfillment: 'delivery',
     time: 'asap',
-    paymentMethod: 'card',
+    paymentMethod: 'upi_cash_on_delivery',
     notes: '',
   });
   const [placedOrder, setPlacedOrder] = useState(null);
   const [orderSnapshot, setOrderSnapshot] = useState(null);
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const errorRef = useRef(null);
 
   useEffect(() => {
     const autofillContact = async () => {
@@ -91,28 +94,70 @@ function Checkout() {
     });
   };
 
+  const showCheckoutError = (message, fieldId) => {
+    setError(message);
+    window.requestAnimationFrame(() => {
+      const field = fieldId ? document.getElementById(fieldId) : null;
+      if (field) {
+        field.focus();
+        field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      errorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  };
+
+  const validateCheckout = () => {
+    if (!formData.fullName.trim()) {
+      return { message: 'Enter your full name.', fieldId: 'fullName' };
+    }
+
+    if (!isValidEmail(formData.email.trim())) {
+      return { message: 'Enter a valid email address.', fieldId: 'email' };
+    }
+
+    if (formData.phone.length !== 10) {
+      return { message: 'Enter a valid 10-digit phone number.', fieldId: 'phone' };
+    }
+
+    if (formData.fulfillment === 'delivery') {
+      if (!formData.address.trim()) {
+        return { message: 'Enter your delivery address.', fieldId: 'address' };
+      }
+
+      if (!formData.city.trim()) {
+        return { message: 'Enter your city.', fieldId: 'city' };
+      }
+
+      if (formData.zipCode.length !== 6) {
+        return { message: 'Enter a valid 6-digit PIN code.', fieldId: 'zipCode' };
+      }
+    }
+
+    return null;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (items.length === 0) return;
     setError('');
 
-    const user = authService.getCurrentUser();
-    if (!user?.id) {
-      setError('Please sign in before placing an order.');
+    const validationError = validateCheckout();
+    if (validationError) {
+      showCheckoutError(validationError.message, validationError.fieldId);
       return;
     }
 
-    if (formData.phone.length !== 10) {
-      setError('Enter a valid 10-digit phone number.');
-      return;
-    }
-
-    if (formData.fulfillment === 'delivery' && formData.zipCode.length !== 6) {
-      setError('Enter a valid 6-digit PIN code.');
+    const currentUser = authService.getCurrentUser();
+    const token = authService.getToken();
+    if (!currentUser?.id || !token) {
+      showCheckoutError('Please sign in before placing an order.');
       return;
     }
 
     try {
+      setIsSubmitting(true);
       const snapshot = {
         itemCount,
         total,
@@ -120,14 +165,14 @@ function Checkout() {
         items: items.map((item) => ({ ...item })),
       };
       const orderPayload = {
-        userId: user.id,
+        userId: currentUser.id,
         totalAmount: total,
         deliveryAddress:
           formData.fulfillment === 'delivery'
-            ? `${formData.address}, ${formData.city}, ${formData.zipCode}`
+            ? `${formData.address.trim()}, ${formData.city.trim()}, ${formData.zipCode}`
             : null,
         paymentMethod: formData.paymentMethod,
-        notes: formData.notes,
+        notes: formData.notes.trim(),
         estimatedDeliveryAt: null,
         items: items.map((item) => ({
           menuItemId: item.id,
@@ -143,8 +188,15 @@ function Checkout() {
       setOrderSnapshot(snapshot);
       setPlacedOrder(newOrder);
       clearCart();
-    } catch {
-      setError('Could not place order.');
+    } catch (orderError) {
+      const status = orderError?.response?.status;
+      const nextMessage =
+        status === 401
+          ? 'Your session expired. Please sign in again before placing the order.'
+          : orderError?.response?.data?.error || 'Could not place order. Please try again.';
+      showCheckoutError(nextMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -210,7 +262,7 @@ function Checkout() {
       </section>
 
       <div className="checkout-container section-shell">
-        <form className="checkout-form" onSubmit={handleSubmit}>
+        <form className="checkout-form" onSubmit={handleSubmit} noValidate>
           {error && <p className="form-status error">{error}</p>}
 
           <section className="form-section">
@@ -317,9 +369,7 @@ function Checkout() {
                 value={formData.paymentMethod}
                 onChange={handleChange}
               >
-                <option value="card">Card at handoff</option>
-                <option value="cash">Cash at handoff</option>
-                <option value="wallet">Digital wallet</option>
+                <option value="upi_cash_on_delivery">UPI/Cash on delivery</option>
               </select>
             </div>
 
@@ -336,7 +386,14 @@ function Checkout() {
             </div>
           </section>
 
-          <button type="submit" className="btn-submit">Place order</button>
+          {error && (
+            <p ref={errorRef} className="form-status error checkout-submit-status">
+              {error}
+            </p>
+          )}
+          <button type="submit" className="btn-submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Placing order...' : 'Place order'}
+          </button>
         </form>
 
         <div className="order-summary">
