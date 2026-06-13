@@ -1,12 +1,13 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, ShoppingBag, Users, Award, BarChart3, LogOut } from 'lucide-react';
+import { clearAdminSession } from '../../api/adminAuth';
 
 const Sidebar = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem('adminToken');
+    clearAdminSession();
     navigate('/admin/login');
   };
 

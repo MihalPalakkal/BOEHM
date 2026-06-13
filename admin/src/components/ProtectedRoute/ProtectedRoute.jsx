@@ -1,10 +1,10 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
+import { clearAdminSession, hasValidAdminSession } from '../../api/adminAuth';
 
 const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem('adminToken');
-  
-  if (!token) {
+  if (!hasValidAdminSession()) {
+    clearAdminSession();
     return <Navigate to="/admin/login" replace />;
   }
   
