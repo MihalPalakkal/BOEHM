@@ -2,6 +2,7 @@
   min-height: 100%;
   display: grid;
   grid-template-rows: auto 1fr;
+  align-self: stretch;
   overflow: hidden;
   background: var(--surface);
   border: 1px solid var(--line);
@@ -51,6 +52,7 @@
 
 .product-details {
   display: grid;
+  grid-template-rows: auto auto auto 1fr;
   gap: 12px;
   padding: 18px;
 }
@@ -62,6 +64,7 @@
 .description {
   margin-top: 6px;
   font-size: 0.94rem;
+  line-height: 1.45;
 }
 
 .product-meta,
@@ -85,6 +88,7 @@
 
 .product-footer {
   justify-content: space-between;
+  align-self: end;
   margin-top: auto;
 }
 

@@ -4,6 +4,20 @@ import authService from '../../services/authService';
 import { useAuth } from '../../context/AuthContext';
 import './Register.css';
 
+const getFriendlyRegisterError = (error) => {
+  const backendMessage = error?.response?.data?.error || '';
+
+  if (backendMessage.toLowerCase().includes('exists')) {
+    return 'An account with this email already exists. Please sign in instead.';
+  }
+
+  if (error?.response?.status >= 500) {
+    return 'We could not create your account right now. Please try again shortly.';
+  }
+
+  return 'Please check your details and try creating the account again.';
+};
+
 function Register() {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -49,7 +63,7 @@ function Register() {
     } catch (error) {
       setStatus({
         type: 'error',
-        message: error?.response?.data?.error || 'Registration failed.',
+        message: getFriendlyRegisterError(error),
       });
     }
   };

@@ -1,16 +1,23 @@
 const pool = require('../config/database');
 
-const tiers = [
+const fallbackTiers = [
   { id: 1, name: 'Bronze', minPoints: 0, maxPoints: 999 },
   { id: 2, name: 'Silver', minPoints: 1000, maxPoints: 4999 },
   { id: 3, name: 'Gold', minPoints: 5000, maxPoints: 9999 },
   { id: 4, name: 'Platinum', minPoints: 10000, maxPoints: null },
 ];
 
-const getTierByPoints = (points) => {
-  return tiers.find((t) => {
-    if (t.maxPoints === null) return points >= t.minPoints;
-    return points >= t.minPoints && points <= t.maxPoints;
+const getTierByPoints = async (connection, points) => {
+  const [rows] = await connection.query(
+    `SELECT id, name, min_points AS minPoints, max_points AS maxPoints
+     FROM loyalty_tiers
+     ORDER BY min_points ASC`,
+  );
+  const tiers = rows.length > 0 ? rows : fallbackTiers;
+
+  return tiers.find((tier) => {
+    if (tier.maxPoints === null) return points >= tier.minPoints;
+    return points >= tier.minPoints && points <= tier.maxPoints;
   }) || tiers[0];
 };
 
@@ -41,7 +48,7 @@ exports.getUserLoyalty = async (userId) => {
       return { ...loyalty, rewards };
     }
 
-    const bronze = tiers[0];
+    const bronze = await getTierByPoints(connection, 0);
     await connection.query(
       'INSERT INTO loyalty_points (user_id, points, tier_id) VALUES (?, 0, ?)',
       [userId, bronze.id]
@@ -118,7 +125,7 @@ exports.redeemReward = async (userId, rewardId) => {
     }
 
     const newPoints = currentPoints - reward.pointsRequired;
-    const tier = getTierByPoints(newPoints);
+    const tier = await getTierByPoints(connection, newPoints);
 
     await connection.query(
       'UPDATE loyalty_points SET points = ?, tier_id = ? WHERE user_id = ?',
@@ -173,15 +180,21 @@ exports.addPoints = async (userId, points, reason = 'order_placed', referenceId 
     );
 
     if (existingRows.length === 0) {
-      const bronze = tiers[0];
+      const tier = await getTierByPoints(connection, points);
       await connection.query(
         'INSERT INTO loyalty_points (user_id, points, tier_id) VALUES (?, ?, ?)',
-        [userId, points, bronze.id]
+        [userId, points, tier.id]
+      );
+      await connection.query(
+        `INSERT INTO loyalty_points_history
+         (user_id, change_amount, balance_after, reason, reference_id)
+         VALUES (?, ?, ?, ?, ?)`,
+        [userId, points, points, reason, referenceId]
       );
     } else {
       const currentPoints = existingRows[0].points;
       const newPoints = currentPoints + points;
-      const tier = getTierByPoints(newPoints);
+      const tier = await getTierByPoints(connection, newPoints);
 
       await connection.query(
         'UPDATE loyalty_points SET points = ?, tier_id = ? WHERE user_id = ?',
@@ -219,4 +232,4 @@ exports.getRewardsCatalogue = async () => {
   } finally {
     connection.release();
   }
-};
+};

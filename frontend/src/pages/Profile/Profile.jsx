@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { menuItems } from '../../services/menuService';
 import { formatCurrency } from '../../services/currencyService';
 import { useCart } from '../../context/CartContext';
-import authService from '../../services/authService';
 import userService from '../../services/userService';
 import loyaltyService from '../../services/loyaltyService';
 import { useAuth } from '../../context/AuthContext';
@@ -115,13 +114,16 @@ function Profile() {
             <h3>Favorites</h3>
             <div className="profile-favorites">
               {favoriteItems.map((item) => (
-                <button key={item.id} type="button" onClick={() => addItem(item)}>
+                <article key={item.id} className="favorite-card">
                   <img src={item.image} alt="" />
                   <span>
                     <strong>{item.name}</strong>
                     <small>{formatCurrency(item.price)}</small>
                   </span>
-                </button>
+                  <button type="button" onClick={() => addItem(item)}>
+                    Add
+                  </button>
+                </article>
               ))}
             </div>
           </div>

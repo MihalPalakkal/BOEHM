@@ -4,6 +4,24 @@ import authService from '../../services/authService';
 import { useAuth } from '../../context/AuthContext';
 import './Login.css';
 
+const getFriendlyLoginError = (error) => {
+  const backendMessage = error?.response?.data?.error || '';
+
+  if (backendMessage.toLowerCase().includes('password')) {
+    return 'That email and password do not match. Please try again.';
+  }
+
+  if (backendMessage.toLowerCase().includes('user')) {
+    return 'We could not find an account with that email.';
+  }
+
+  if (error?.response?.status >= 500) {
+    return 'We could not sign you in right now. Please try again shortly.';
+  }
+
+  return 'Please check your email and password and try again.';
+};
+
 function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -36,7 +54,7 @@ function Login() {
     } catch (error) {
       setStatus({
         type: 'error',
-        message: error?.response?.data?.error || 'Login failed.',
+        message: getFriendlyLoginError(error),
       });
     }
   };

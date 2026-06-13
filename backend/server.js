@@ -15,12 +15,14 @@ const orderRoutes = require('./orders/order.routes');
 const loyaltyRoutes = require('./loyalty/loyalty.routes');
 const userRoutes = require('./users/users.routes');
 const menuRoutes = require('./menu/menu.routes');
+const adminRoutes = require('./admin/admin.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/loyalty', loyaltyRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/menu', menuRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'Server is running' });

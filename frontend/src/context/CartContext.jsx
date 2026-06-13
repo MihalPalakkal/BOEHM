@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { findMenuItem } from '../services/menuService';
+import { getRewardPoints } from '../services/currencyService';
 
 const CartContext = createContext(null);
 const CART_STORAGE_KEY = 'boehm-cart';
@@ -76,7 +77,7 @@ export function CartProvider({ children }) {
     const serviceFee = subtotal > 0 ? SERVICE_FEE : 0;
     const total = subtotal + tax + deliveryFee + serviceFee;
     const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
-    const rewardPoints = Math.floor(subtotal / 10);
+    const rewardPoints = getRewardPoints(subtotal);
 
     return {
       items,

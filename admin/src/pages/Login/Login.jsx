@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axiosInstance from '../../api/axiosInstance';
 import { motion } from 'framer-motion';
 import { Lock, Mail } from 'lucide-react';
 
@@ -22,7 +21,7 @@ const Login = () => {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 800));
         localStorage.setItem('adminToken', 'dummy-test-token-123');
-        navigate('/admin/orders');
+        navigate('/admin');
       } else {
         throw new Error('Invalid email or password. Use admin@boehm.com / admin123');
       }
