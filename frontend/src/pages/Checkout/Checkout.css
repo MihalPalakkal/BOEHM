@@ -88,6 +88,10 @@
   font-weight: 850;
 }
 
+.checkout-submit-status {
+  margin-top: 4px;
+}
+
 .confirmation,
 .empty-checkout {
   display: grid;

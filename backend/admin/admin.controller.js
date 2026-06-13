@@ -22,6 +22,24 @@ exports.updateOrderStatus = async (req, res) => {
   }
 };
 
+exports.getCustomers = async (req, res) => {
+  try {
+    const customers = await adminService.getCustomers(req.query);
+    res.status(200).json(customers);
+  } catch (error) {
+    sendError(res, error);
+  }
+};
+
+exports.adjustCustomerPoints = async (req, res) => {
+  try {
+    const customer = await adminService.adjustCustomerPoints(req.params.userId, req.body);
+    res.status(200).json(customer);
+  } catch (error) {
+    sendError(res, error);
+  }
+};
+
 exports.getMenuItems = async (req, res) => {
   try {
     const items = await adminService.getMenuItems();

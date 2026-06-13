@@ -18,6 +18,17 @@ const statusFlow = ['pending', 'confirmed', 'preparing', 'ready', 'out_for_deliv
 const formatStatus = (status) =>
   statusOptions.find((option) => option.value === status)?.label || status.replaceAll('_', ' ');
 
+const formatPayment = (method) => {
+  const labels = {
+    card: 'Card',
+    upi: 'UPI',
+    upi_cash_after_delivery: 'UPI/Cash after delivery',
+    upi_cash_on_delivery: 'UPI/Cash on delivery',
+  };
+
+  return labels[method] || method || 'Not selected';
+};
+
 const getStatusBadge = (status) => {
   if (status === 'delivered') return 'badge badge-success';
   if (status === 'cancelled') return 'badge badge-danger';
@@ -144,6 +155,9 @@ const Orders = () => {
                 <div style={{ padding: '1rem', backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: '8px', marginBottom: '1.5rem' }}>
                   <p style={{ fontSize: '0.875rem', marginBottom: '0.5rem', fontWeight: 500 }}>{itemText}</p>
                   <p style={{ fontWeight: 600, color: 'var(--success)' }}>₹{Number(order.totalAmount || 0).toLocaleString('en-IN')}</p>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginTop: '0.35rem' }}>
+                    Payment: {formatPayment(order.paymentMethod)}
+                  </p>
                 </div>
 
                 <div className="flex gap-2 mt-auto">

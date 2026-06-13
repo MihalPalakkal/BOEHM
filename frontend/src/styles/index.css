@@ -285,6 +285,12 @@ p {
   background: rgba(180, 35, 24, 0.1);
 }
 
+.form-status.error {
+  color: var(--tomato-dark);
+  background: rgba(180, 35, 24, 0.12);
+  border: 1px solid rgba(180, 35, 24, 0.18);
+}
+
 .auth-layout {
   display: grid;
   grid-template-columns: minmax(0, 0.95fr) minmax(360px, 0.72fr);
